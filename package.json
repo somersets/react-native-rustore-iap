@@ -1,14 +1,11 @@
 {
   "name": "@somersets/react-native-rustore-iap",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "test",
-  "main": "lib/commonjs/index",
-  "module": "lib/module/index",
-  "types": "lib/typescript/index.d.ts",
+  "main": "lib/module/index.js",
+  "types": "lib/typescript/types.d.ts",
   "react-native": "src/index",
-  "source": "src/index",
   "files": [
-    "src",
     "lib",
     "android",
     "ios",
@@ -26,6 +23,7 @@
     "typescript": "tsc --noEmit",
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
     "prepare": "bob build",
+    "npmRelease": "standard-version && git push && npm publish",
     "release": "release-it",
     "example": "yarn --cwd example",
     "bootstrap": "yarn example && yarn && yarn example pods"
@@ -105,7 +103,7 @@
   },
   "eslintConfig": {
     "root": true,
-    "parser": "@babel/eslint-parser",
+    "parser": "@typescript-eslint/parser",
     "extends": [
       "@react-native-community",
       "prettier"
