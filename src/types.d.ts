@@ -1,6 +1,6 @@
 import { RuStoreProductStatus, RuStoreProductType, RuStorePurchaseState } from './enums';
 
-export interface RuStorePurchase {
+interface RuStorePurchase {
   purchaseId: string;
   productId: string;
   description: string;
@@ -15,7 +15,7 @@ export interface RuStorePurchase {
   developerPayload: string;
 }
 
-export interface RuStoreProduct {
+interface RuStoreProduct {
   productId: string;
   productType: RuStoreProductType;
   productStatus: RuStoreProductStatus;
@@ -30,7 +30,7 @@ export interface RuStoreProduct {
   subscription: RuStoreProductSubscription;
 }
 
-export interface RuStoreProductSubscription {
+interface RuStoreProductSubscription {
   freeTrialPeriod: RuStoreSubscriptionPeriod;
   gracePeriod: RuStoreSubscriptionPeriod;
   introductoryPrice: string;
@@ -39,7 +39,7 @@ export interface RuStoreProductSubscription {
   subscriptionPeriod: RuStoreSubscriptionPeriod;
 }
 
-export interface RuStoreSubscriptionPeriod {
+interface RuStoreSubscriptionPeriod {
   days: number;
   months: number;
   years: number;
