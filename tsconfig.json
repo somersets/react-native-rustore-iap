@@ -2,7 +2,7 @@
   "compilerOptions": {
     "baseUrl": "./",
     "paths": {
-      "react-native-rustore-iap": ["./src/index"]
+      "@somersets/react-native-rustore-iap": ["./lib/module/index"]
     },
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
