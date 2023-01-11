@@ -1,11 +1,11 @@
 {
   "name": "@somersets/react-native-rustore-iap",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "test",
-  "main": "./lib/index.js",
-  "module": "./lib/index.js",
-  "types": "./lib/types.d.ts",
-  "react-native": "src/index",
+  "main": "./lib/module/index.js",
+  "module": "./lib/module/index.js",
+  "types": "./lib/typescript/types.d.ts",
+  "react-native": "src/index.ts",
   "files": [
     "lib",
     "android",

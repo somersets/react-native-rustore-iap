@@ -1,5 +1,4 @@
 import { NativeModules, Platform } from 'react-native';
-import type { RuStoreProduct, RuStorePurchase } from './types';
 
 const LINKING_ERROR =
   `The package 'react-native-rustore-iap' doesn't seem to be linked. Make sure: \n\n` +
@@ -34,5 +33,53 @@ export async function getRuStorePurchases(): Promise<RuStorePurchase[]> {
   return await RustoreIap.getRuStorePurchases();
 }
 
-// errors meaning
-// Application not active or not found - Приложение с заданным applicationId не найдено в RuStore
+import type {
+  RuStoreProductStatus,
+  RuStoreProductType,
+  RuStorePurchaseState,
+} from './enums';
+
+export interface RuStorePurchase {
+  purchaseId: string;
+  productId: string;
+  description: string;
+  language: string;
+  purchaseTime: string;
+  orderId: string;
+  amountLabel: string;
+  amount: number;
+  currency: string;
+  quantity: number;
+  purchaseState: RuStorePurchaseState;
+  developerPayload: string;
+}
+
+export interface RuStoreProduct {
+  productId: string;
+  productType: RuStoreProductType;
+  productStatus: RuStoreProductStatus;
+  priceLabel: string;
+  price: number;
+  currency: string;
+  language: string;
+  title: string;
+  description: string;
+  imageUrl: any;
+  promoImageUrl: any;
+  subscription: RuStoreProductSubscription;
+}
+
+export interface RuStoreProductSubscription {
+  freeTrialPeriod: RuStoreSubscriptionPeriod;
+  gracePeriod: RuStoreSubscriptionPeriod;
+  introductoryPrice: string;
+  introductoryPriceAmount: string;
+  introductoryPricePeriod: RuStoreSubscriptionPeriod;
+  subscriptionPeriod: RuStoreSubscriptionPeriod;
+}
+
+export interface RuStoreSubscriptionPeriod {
+  days: number;
+  months: number;
+  years: number;
+}
