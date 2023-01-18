@@ -1,14 +1,15 @@
 package com.reactnativerustoreiap
 
+import android.net.Uri
 import com.facebook.react.bridge.*
 import ru.rustore.sdk.billingclient.RuStoreBillingClient
-import ru.rustore.sdk.billingclient.model.product.Product
-import ru.rustore.sdk.billingclient.model.product.ProductType
+import ru.rustore.sdk.billingclient.model.product.*
 import ru.rustore.sdk.billingclient.model.purchase.PaymentFinishCode
 import ru.rustore.sdk.billingclient.model.purchase.PaymentResult
 import ru.rustore.sdk.billingclient.model.purchase.response.ConfirmPurchaseResponse
 import ru.rustore.sdk.core.feature.model.FeatureAvailabilityResult
 import ru.rustore.sdk.core.tasks.OnCompleteListener
+import java.util.concurrent.Flow.Subscription
 
 
 class RustoreIapModule(reactContext: ReactApplicationContext) :
@@ -41,12 +42,76 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
-  fun purchaseRuStoreProduct(product: Product, promise: Promise) {
-    RuStoreBillingClient.purchases.purchaseProduct(product.productId)
+  fun purchaseRuStoreProduct(product: ReadableMap, promise: Promise) {
+    val subscription = product.getMap("subscription")
+    val freeTrialPeriod = subscription?.getMap("freeTrialPeriod")
+    val gracePeriod = subscription?.getMap("gracePeriod")
+    val introductoryPricePeriod = subscription?.getMap("introductoryPricePeriod");
+    val subscriptionPeriod = subscription?.getMap("subscriptionPeriod");
+
+    val nativeFreeTrialPeriod: SubscriptionPeriod? = freeTrialPeriod?.let {
+      SubscriptionPeriod(
+        days = it.getInt("days"),
+        months = it.getInt("months"),
+        years = it.getInt("years"),
+      )
+    }
+
+    val nativeGracePeriod: SubscriptionPeriod? = gracePeriod?.let {
+      SubscriptionPeriod(
+        days = it.getInt("days"),
+        months = it.getInt("months"),
+        years = it.getInt("years"),
+    )
+    }
+    val nativeIntroductoryPricePeriod: SubscriptionPeriod? = introductoryPricePeriod?.let {
+      SubscriptionPeriod(
+        days = it.getInt("days"),
+        months = it.getInt("months"),
+        years = it.getInt("years"),
+      )
+    }
+
+    val nativeSubscriptionPeriod: SubscriptionPeriod? = subscriptionPeriod?.let {
+      SubscriptionPeriod(
+        days = it.getInt("days"),
+        months = it.getInt("months"),
+        years = it.getInt("years"),
+      )
+    }
+
+
+    val nativeProductSubscription: ProductSubscription = ProductSubscription(
+      freeTrialPeriod = nativeFreeTrialPeriod,
+      gracePeriod = nativeGracePeriod,
+      introductoryPrice = subscription?.getString("introductoryPrice"),
+      introductoryPriceAmount = subscription?.getString("introductoryPriceAmount"),
+      introductoryPricePeriod = nativeIntroductoryPricePeriod,
+      subscriptionPeriod = nativeSubscriptionPeriod,
+    )
+
+    val nativeProduct: Product = Product(
+      currency = product.getString("currency"),
+      description = product.getString("description"),
+      imageUrl = Uri.parse(product.getString("imageUrl")),
+      language = product.getString("language"),
+      price = product.getInt("price"),
+      priceLabel = product.getString("priceLabel"),
+      productId = product.getString("productId").toString(),
+      productStatus = enumValueOf<ProductStatus>(product.getString("productStatus")!!),
+      productType = enumValueOf<ProductType>(product.getString("productType")!!),
+      promoImageUrl = Uri.parse(product.getString("promoImageUrl")),
+      subscription = nativeProductSubscription,
+      title = product.getString("title")
+    )
+
+
+
+    RuStoreBillingClient.purchases.purchaseProduct(nativeProduct.productId)
       .addOnSuccessListener { paymentResult ->
         handlePaymentResult(
           paymentResult,
-          product
+          nativeProduct
         ) { it: Throwable?, response: ConfirmPurchaseResponse? ->
           if (it != null) {
             promise.reject(it)
