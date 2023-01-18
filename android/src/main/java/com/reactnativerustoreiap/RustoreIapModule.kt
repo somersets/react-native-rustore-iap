@@ -44,39 +44,50 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
   @ReactMethod
   fun purchaseRuStoreProduct(product: ReadableMap, promise: Promise) {
     val subscription = product.getMap("subscription")
+
     val freeTrialPeriod = subscription?.getMap("freeTrialPeriod")
     val gracePeriod = subscription?.getMap("gracePeriod")
     val introductoryPricePeriod = subscription?.getMap("introductoryPricePeriod");
     val subscriptionPeriod = subscription?.getMap("subscriptionPeriod");
 
-    val nativeFreeTrialPeriod: SubscriptionPeriod? = freeTrialPeriod?.let {
-      SubscriptionPeriod(
-        days = it.getInt("days"),
-        months = it.getInt("months"),
-        years = it.getInt("years"),
+
+    var nativeFreeTrialPeriod: SubscriptionPeriod? = null
+    if (freeTrialPeriod != null) {
+      nativeFreeTrialPeriod = freeTrialPeriod?.getInt("days")?.let {
+        SubscriptionPeriod(
+          days = it,
+          months = freeTrialPeriod.getInt("months"),
+          years = freeTrialPeriod.getInt("years"),
+        )
+      }
+    }
+
+
+    var nativeGracePeriod: SubscriptionPeriod? = null
+    if (gracePeriod != null) {
+      nativeGracePeriod = SubscriptionPeriod(
+        days = gracePeriod.getInt("days"),
+        months = gracePeriod.getInt("months"),
+        years = gracePeriod.getInt("years"),
       )
     }
 
-    val nativeGracePeriod: SubscriptionPeriod? = gracePeriod?.let {
-      SubscriptionPeriod(
-        days = it.getInt("days"),
-        months = it.getInt("months"),
-        years = it.getInt("years"),
-    )
-    }
-    val nativeIntroductoryPricePeriod: SubscriptionPeriod? = introductoryPricePeriod?.let {
-      SubscriptionPeriod(
-        days = it.getInt("days"),
-        months = it.getInt("months"),
-        years = it.getInt("years"),
+    var nativeIntroductoryPricePeriod: SubscriptionPeriod? = null
+    if (introductoryPricePeriod != null) {
+      nativeIntroductoryPricePeriod = SubscriptionPeriod(
+        days = introductoryPricePeriod.getInt("days"),
+        months = introductoryPricePeriod.getInt("months"),
+        years = introductoryPricePeriod.getInt("years"),
       )
     }
 
-    val nativeSubscriptionPeriod: SubscriptionPeriod? = subscriptionPeriod?.let {
-      SubscriptionPeriod(
-        days = it.getInt("days"),
-        months = it.getInt("months"),
-        years = it.getInt("years"),
+
+    var nativeSubscriptionPeriod: SubscriptionPeriod? = null
+    if (subscriptionPeriod != null) {
+      nativeSubscriptionPeriod = SubscriptionPeriod(
+        days = subscriptionPeriod.getInt("days"),
+        months = subscriptionPeriod.getInt("months"),
+        years = subscriptionPeriod.getInt("years"),
       )
     }
 
@@ -197,64 +208,64 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
             nativeProduct.subscription?.introductoryPriceAmount
           )
 
-          nativeProduct.subscription?.freeTrialPeriod?.let {
+          nativeProduct.subscription?.freeTrialPeriod.let {
             freeTrialPeriod.putInt(
               "days",
-              it.days
+              it?.days ?: 0
             )
           }
-          nativeProduct.subscription?.freeTrialPeriod?.let {
+          nativeProduct.subscription?.freeTrialPeriod.let {
             freeTrialPeriod.putInt(
               "months",
-              it.months
+              it?.months ?: 0
             )
           }
-          nativeProduct.subscription?.freeTrialPeriod?.let {
+          nativeProduct.subscription?.freeTrialPeriod.let {
             freeTrialPeriod.putInt(
               "years",
-              it.years
+              it?.years ?: 0
             )
           }
 
-          nativeProduct.subscription?.gracePeriod?.let { gracePeriod.putInt("days", it.days) }
-          nativeProduct.subscription?.gracePeriod?.let { gracePeriod.putInt("months", it.months) }
-          nativeProduct.subscription?.gracePeriod?.let { gracePeriod.putInt("years", it.years) }
+          nativeProduct.subscription?.gracePeriod.let { gracePeriod.putInt("days", it?.days ?: 0) }
+          nativeProduct.subscription?.gracePeriod.let { gracePeriod.putInt("months", it?.months ?: 0) }
+          nativeProduct.subscription?.gracePeriod.let { gracePeriod.putInt("years", it?.years ?: 0) }
 
-          nativeProduct.subscription?.introductoryPricePeriod?.let {
+          nativeProduct.subscription?.introductoryPricePeriod.let {
             introductoryPricePeriod.putInt(
               "days",
-              it.days
+              it?.days ?: 0
             )
           }
-          nativeProduct.subscription?.introductoryPricePeriod?.let {
+          nativeProduct.subscription?.introductoryPricePeriod.let {
             introductoryPricePeriod.putInt(
               "months",
-              it.months
+              it?.months ?: 0
             )
           }
-          nativeProduct.subscription?.introductoryPricePeriod?.let {
+          nativeProduct.subscription?.introductoryPricePeriod.let {
             introductoryPricePeriod.putInt(
               "years",
-              it.years
+              it?.years ?: 0
             )
           }
 
-          nativeProduct.subscription?.subscriptionPeriod?.let {
+          nativeProduct.subscription?.subscriptionPeriod.let {
             subscriptionPeriod.putInt(
               "days",
-              it.days
+              it?.days ?: 0
             )
           }
-          nativeProduct.subscription?.subscriptionPeriod?.let {
+          nativeProduct.subscription?.subscriptionPeriod.let {
             subscriptionPeriod.putInt(
               "months",
-              it.months
+              it?.months ?: 0
             )
           }
-          nativeProduct.subscription?.subscriptionPeriod?.let {
+          nativeProduct.subscription?.subscriptionPeriod.let {
             subscriptionPeriod.putInt(
               "years",
-              it.years
+              it?.years ?: 0
             )
           }
 
