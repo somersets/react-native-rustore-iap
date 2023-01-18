@@ -41,7 +41,7 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
-  fun purchaseProduct(product: Product, promise: Promise) {
+  fun purchaseRuStoreProduct(product: Product, promise: Promise) {
     RuStoreBillingClient.purchases.purchaseProduct(product.productId)
       .addOnSuccessListener { paymentResult ->
         handlePaymentResult(
