@@ -148,7 +148,8 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
       is PaymentResult.PurchaseResult -> {
         when (paymentResult.finishCode) {
           PaymentFinishCode.SUCCESSFUL_PAYMENT -> {
-            if (product.productType == ProductType.CONSUMABLE) {
+            if (product.productType == ProductType.CONSUMABLE ||
+              product.productType == ProductType.SUBSCRIPTION) {
               confirmPurchase(paymentResult.purchaseId) { it: Throwable?, response: ConfirmPurchaseResponse? ->
                 if (it != null) {
                   callback.invoke(it, null)
