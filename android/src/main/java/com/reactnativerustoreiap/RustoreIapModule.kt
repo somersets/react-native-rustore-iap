@@ -51,45 +51,39 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
     val subscriptionPeriod = subscription?.getMap("subscriptionPeriod");
 
 
-    var nativeFreeTrialPeriod: SubscriptionPeriod? = null
-    if (freeTrialPeriod != null) {
-      nativeFreeTrialPeriod = freeTrialPeriod?.getInt("days")?.let {
+    val nativeFreeTrialPeriod: SubscriptionPeriod? = freeTrialPeriod?.let {
         SubscriptionPeriod(
-          days = it,
+          days = freeTrialPeriod.getInt("days"),
           months = freeTrialPeriod.getInt("months"),
           years = freeTrialPeriod.getInt("years"),
         )
       }
-    }
 
 
-    var nativeGracePeriod: SubscriptionPeriod? = null
-    if (gracePeriod != null) {
-      nativeGracePeriod = SubscriptionPeriod(
-        days = gracePeriod.getInt("days"),
-        months = gracePeriod.getInt("months"),
-        years = gracePeriod.getInt("years"),
-      )
-    }
+      val nativeGracePeriod: SubscriptionPeriod? = gracePeriod?.let {
+        SubscriptionPeriod(
+          days = gracePeriod.getInt("days"),
+          months = gracePeriod.getInt("months"),
+          years = gracePeriod.getInt("years"),
+        )
+      }
 
-    var nativeIntroductoryPricePeriod: SubscriptionPeriod? = null
-    if (introductoryPricePeriod != null) {
-      nativeIntroductoryPricePeriod = SubscriptionPeriod(
-        days = introductoryPricePeriod.getInt("days"),
-        months = introductoryPricePeriod.getInt("months"),
-        years = introductoryPricePeriod.getInt("years"),
-      )
-    }
+      val nativeIntroductoryPricePeriod: SubscriptionPeriod? = introductoryPricePeriod?.let {
+        SubscriptionPeriod(
+          days = introductoryPricePeriod.getInt("days"),
+          months = introductoryPricePeriod.getInt("months"),
+          years = introductoryPricePeriod.getInt("years"),
+        )
+      }
 
 
-    var nativeSubscriptionPeriod: SubscriptionPeriod? = null
-    if (subscriptionPeriod != null) {
-      nativeSubscriptionPeriod = SubscriptionPeriod(
-        days = subscriptionPeriod.getInt("days"),
-        months = subscriptionPeriod.getInt("months"),
-        years = subscriptionPeriod.getInt("years"),
-      )
-    }
+      val nativeSubscriptionPeriod: SubscriptionPeriod? = subscriptionPeriod?.let {
+        SubscriptionPeriod(
+          days = subscriptionPeriod.getInt("days"),
+          months = subscriptionPeriod.getInt("months"),
+          years = subscriptionPeriod.getInt("years"),
+        )
+      }
 
 
     val nativeProductSubscription: ProductSubscription = ProductSubscription(
@@ -122,14 +116,9 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
       .addOnSuccessListener { paymentResult ->
         handlePaymentResult(
           paymentResult,
-          nativeProduct
-        ) { it: Throwable?, response: ConfirmPurchaseResponse? ->
-          if (it != null) {
-            promise.reject(it)
-          } else {
-            promise.resolve(response)
-          }
-        }
+          nativeProduct,
+          promise,
+        )
       }
       .addOnFailureListener {
         promise.reject(it)
@@ -139,26 +128,33 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
   private fun handlePaymentResult(
     paymentResult: PaymentResult,
     product: Product,
-    callback: (Throwable?, ConfirmPurchaseResponse?) -> Unit
+    promise: Promise
   ) {
     when (paymentResult) {
       is PaymentResult.InvalidPurchase -> {
-        paymentResult.purchaseId?.let { deletePurchase(it) }
+        paymentResult.purchaseId?.let { deletePurchase(it, null) }
+        val payRes = Arguments.createMap();
+        payRes.putString("purchaseId", paymentResult.purchaseId)
+        paymentResult.errorCode?.let { payRes.putInt("errorCode", it) }
+        payRes.putString("productId", paymentResult.productId)
+        payRes.putString("orderId", paymentResult.orderId)
+        payRes.putString("invoiceId", paymentResult.invoiceId)
+        paymentResult.quantity?.let { payRes.putInt("quantity", it) }
+        promise.resolve(payRes)
       }
       is PaymentResult.PurchaseResult -> {
         when (paymentResult.finishCode) {
           PaymentFinishCode.SUCCESSFUL_PAYMENT -> {
             if (product.productType == ProductType.CONSUMABLE ||
               product.productType == ProductType.SUBSCRIPTION) {
-              confirmPurchase(paymentResult.purchaseId) { it: Throwable?, response: ConfirmPurchaseResponse? ->
-                if (it != null) {
-                  callback.invoke(it, null)
-                  throw it;
-                } else {
-                  callback.invoke(null, response)
-                }
-              }
-
+              confirmPurchase(paymentResult.purchaseId, promise)
+              val payRes = Arguments.createMap();
+              payRes.putString("purchaseId", paymentResult.purchaseId)
+              payRes.putString("productId", paymentResult.productId)
+              payRes.putString("orderId", paymentResult.orderId)
+              payRes.putString("subscriptionToken", paymentResult.subscriptionToken)
+              payRes.putString("finishCode", paymentResult.finishCode.toString())
+              promise.resolve(payRes)
             }
           }
           PaymentFinishCode.CLOSED_BY_USER,
@@ -167,7 +163,7 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
           PaymentFinishCode.DECLINED_BY_SERVER,
           PaymentFinishCode.RESULT_UNKNOWN,
           -> {
-            deletePurchase(paymentResult.purchaseId)
+            deletePurchase(paymentResult.purchaseId, null)
           }
         }
       }
@@ -322,24 +318,37 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
     }
   }
 
-  private fun deletePurchase(purchaseId: String) {
+  @ReactMethod
+  fun deletePurchase(purchaseId: String, promise: Promise?) {
     RuStoreBillingClient.purchases.deletePurchase(purchaseId)
       .addOnSuccessListener { response ->
+        val deletePurchaseResponse = Arguments.createMap()
+        deletePurchaseResponse.putInt("code", response.code)
+        deletePurchaseResponse.putString("errorDescription", response.errorDescription)
+        deletePurchaseResponse.putString("traceId", response.traceId)
+        deletePurchaseResponse.putString("errorMessage", response.errorMessage)
+        promise?.resolve(deletePurchaseResponse)
       }
       .addOnFailureListener {
       }
   }
 
-  private fun confirmPurchase(
+  @ReactMethod
+  fun confirmPurchase(
     purchaseId: String,
-    callback: (Throwable?, ConfirmPurchaseResponse?) -> Unit
+    promise: Promise
   ) {
     RuStoreBillingClient.purchases.confirmPurchase(purchaseId)
       .addOnSuccessListener { response ->
-        callback.invoke(null, response);
+        val confirmPurchaseResponse = Arguments.createMap()
+        confirmPurchaseResponse.putInt("code", response.code)
+        confirmPurchaseResponse.putString("errorDescription", response.errorDescription)
+        confirmPurchaseResponse.putString("traceId", response.traceId)
+        confirmPurchaseResponse.putString("errorMessage", response.errorMessage)
+        promise.resolve(confirmPurchaseResponse)
       }
       .addOnFailureListener {
-        callback.invoke(it, null);
+        promise.reject(it)
       }
   }
 

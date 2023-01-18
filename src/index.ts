@@ -27,18 +27,23 @@ interface RuStoreIapModule {
   checkRuStorePurchasesAvailability: () => Promise<Boolean>;
   purchaseRuStoreProduct: (
     product: RuStoreProduct
-  ) => Promise<ConfirmPurchaseResponse>;
+  ) => Promise<ConfirmPurchaseResponse | InvalidPurchaseResult>;
   getRuStoreProducts: (productIds: String[]) => Promise<RuStoreProduct[]>;
   getRuStorePurchases: () => Promise<RuStorePurchase[]>;
+  confirmRuStorePurchase: () => Promise<ConfirmPurchaseResponse>;
 }
 
 export async function checkRuStoreAvailable(): Promise<Boolean> {
   return await RuStoreIap.checkRuStorePurchasesAvailability();
 }
 
+export async function confirmRuStorePurchase(): Promise<ConfirmPurchaseResponse> {
+  return await RuStoreIap.confirmRuStorePurchase();
+}
+
 export async function purchaseRuStoreProduct(
   product: RuStoreProduct
-): Promise<ConfirmPurchaseResponse> {
+): Promise<ConfirmPurchaseResponse | InvalidPurchaseResult> {
   return await RuStoreIap.purchaseRuStoreProduct(product);
 }
 
@@ -97,6 +102,15 @@ export interface ConfirmPurchaseResponse {
   errorMessage: string;
   errors: string[];
   traceId: string;
+}
+
+export interface InvalidPurchaseResult {
+  purchaseId: string;
+  invoiceId: string;
+  orderId: string;
+  quantity: number;
+  productId: string;
+  errorCode: number;
 }
 
 export interface RuStoreSubscriptionPeriod {
