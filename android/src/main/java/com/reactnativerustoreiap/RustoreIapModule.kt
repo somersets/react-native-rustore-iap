@@ -239,7 +239,7 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
         }
       }
 
-      promise.resolve(purchaseResponse.purchases);
+      promise.resolve(purchases);
     } catch (e: Throwable) {
       promise.reject("Getting products error!", e);
     }
