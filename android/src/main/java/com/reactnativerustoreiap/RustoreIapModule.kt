@@ -94,8 +94,12 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
   @ReactMethod
   fun getRuStoreProducts(productIds: ReadableArray, promise: Promise) {
     try {
-      val ids = productIds.toArrayList().toList() as List<String>;
-      val productsResponse = RuStoreBillingClient.products.getProducts(ids).await();
+      val nativeArrayListIds: ArrayList<String> = ArrayList()
+
+      for (i in 0 until productIds.size()) {
+        nativeArrayListIds.add(productIds.getString(i))
+      }
+      val productsResponse = RuStoreBillingClient.products.getProducts(nativeArrayListIds.toList()).await();
       promise.resolve(productsResponse.products);
     } catch (e: Throwable) {
       promise.reject("Getting products error!", e);
