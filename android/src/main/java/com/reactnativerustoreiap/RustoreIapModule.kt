@@ -162,6 +162,13 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
           PaymentFinishCode.RESULT_UNKNOWN,
           -> {
             deleteRuStorePurchase(paymentResult.purchaseId, null)
+            val payRes = Arguments.createMap();
+            payRes.putString("purchaseId", paymentResult.purchaseId)
+            payRes.putString("productId", paymentResult.productId)
+            payRes.putString("orderId", paymentResult.orderId)
+            payRes.putString("subscriptionToken", paymentResult.subscriptionToken)
+            payRes.putString("finishCode", paymentResult.finishCode.toString())
+            promise.resolve(payRes)
           }
         }
       }

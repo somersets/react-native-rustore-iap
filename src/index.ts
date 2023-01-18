@@ -27,10 +27,12 @@ interface RuStoreIapModule {
   checkRuStorePurchasesAvailability: () => Promise<Boolean>;
   purchaseRuStoreProduct: (
     product: RuStoreProduct
-  ) => Promise<ConfirmPurchaseResponse | InvalidPurchaseResult>;
+  ) => Promise<PaymentResult | InvalidPurchaseResult>;
   getRuStoreProducts: (productIds: String[]) => Promise<RuStoreProduct[]>;
   getRuStorePurchases: () => Promise<RuStorePurchase[]>;
-  confirmRuStorePurchase: () => Promise<ConfirmPurchaseResponse>;
+  confirmRuStorePurchase: (
+    purchaseId: string
+  ) => Promise<ConfirmPurchaseResponse>;
   deleteRuStorePurchase: (
     purchaseId: string
   ) => Promise<DeletePurchaseResponse>;
@@ -40,8 +42,10 @@ export async function checkRuStoreAvailable(): Promise<Boolean> {
   return await RuStoreIap.checkRuStorePurchasesAvailability();
 }
 
-export async function confirmRuStorePurchase(): Promise<ConfirmPurchaseResponse> {
-  return await RuStoreIap.confirmRuStorePurchase();
+export async function confirmRuStorePurchase(
+  purchaseId: string
+): Promise<ConfirmPurchaseResponse> {
+  return await RuStoreIap.confirmRuStorePurchase(purchaseId);
 }
 
 export async function deleteRuStorePurchase(
@@ -52,7 +56,7 @@ export async function deleteRuStorePurchase(
 
 export async function purchaseRuStoreProduct(
   product: RuStoreProduct
-): Promise<ConfirmPurchaseResponse | InvalidPurchaseResult> {
+): Promise<PaymentResult | InvalidPurchaseResult> {
   return await RuStoreIap.purchaseRuStoreProduct(product);
 }
 
@@ -111,6 +115,14 @@ export interface ConfirmPurchaseResponse {
   errorMessage: string;
   errors: string[];
   traceId: string;
+}
+
+interface PaymentResult {
+  purchaseId: string;
+  productId: string;
+  orderId: string;
+  subscriptionToken: string;
+  finishCode: string;
 }
 
 export interface DeletePurchaseResponse {
