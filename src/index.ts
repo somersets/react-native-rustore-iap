@@ -17,10 +17,8 @@ const RustoreIap = NativeModules.RustoreIap
       }
     );
 
-export function checkRuStoreAvailable(
-  cb: (error: any, isAvailable: boolean) => void
-) {
-  RustoreIap.checkRuStorePurchasesAvailability(cb);
+export async function checkRuStoreAvailable(): Promise<Boolean> {
+  return await RustoreIap.checkRuStorePurchasesAvailability();
 }
 
 export async function getRuStoreProducts(
