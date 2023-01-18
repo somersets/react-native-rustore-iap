@@ -26,12 +26,14 @@ const RuStoreIap: RuStoreIapModule = NativeModules.RustoreIap
 interface RuStoreIapModule {
   checkRuStorePurchasesAvailability: () => Promise<Boolean>;
   purchaseRuStoreProduct: (
-    product: RuStoreProduct
+    product: RuStoreProduct,
+    developerPayload?: string
   ) => Promise<PaymentResult | InvalidPurchaseResult>;
   getRuStoreProducts: (productIds: String[]) => Promise<RuStoreProduct[]>;
   getRuStorePurchases: () => Promise<RuStorePurchase[]>;
   confirmRuStorePurchase: (
-    purchaseId: string
+    purchaseId: string,
+    developerPayload?: string
   ) => Promise<ConfirmPurchaseResponse>;
   deleteRuStorePurchase: (
     purchaseId: string
@@ -43,9 +45,10 @@ export async function checkRuStoreAvailable(): Promise<Boolean> {
 }
 
 export async function confirmRuStorePurchase(
-  purchaseId: string
+  purchaseId: string,
+  developerPayload?: string
 ): Promise<ConfirmPurchaseResponse> {
-  return await RuStoreIap.confirmRuStorePurchase(purchaseId);
+  return await RuStoreIap.confirmRuStorePurchase(purchaseId, developerPayload);
 }
 
 export async function deleteRuStorePurchase(
@@ -55,9 +58,10 @@ export async function deleteRuStorePurchase(
 }
 
 export async function purchaseRuStoreProduct(
-  product: RuStoreProduct
+  product: RuStoreProduct,
+  developerPayload?: string
 ): Promise<PaymentResult | InvalidPurchaseResult> {
-  return await RuStoreIap.purchaseRuStoreProduct(product);
+  return await RuStoreIap.purchaseRuStoreProduct(product, developerPayload);
 }
 
 export async function getRuStoreProducts(

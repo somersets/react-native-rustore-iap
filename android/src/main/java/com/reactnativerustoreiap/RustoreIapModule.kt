@@ -40,7 +40,7 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
-  fun purchaseRuStoreProduct(product: ReadableMap, promise: Promise) {
+  fun purchaseRuStoreProduct(product: ReadableMap, developerPayload: String?, promise: Promise) {
     val subscription = product.getMap("subscription")
 
     val freeTrialPeriod = subscription?.getMap("freeTrialPeriod")
@@ -115,6 +115,7 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
         handlePaymentResult(
           paymentResult,
           nativeProduct,
+          developerPayload,
           promise,
         )
       }
@@ -126,6 +127,7 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
   private fun handlePaymentResult(
     paymentResult: PaymentResult,
     product: Product,
+    developerPayload: String?,
     promise: Promise
   ) {
     when (paymentResult) {
@@ -145,7 +147,7 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
           PaymentFinishCode.SUCCESSFUL_PAYMENT -> {
             if (product.productType == ProductType.CONSUMABLE ||
               product.productType == ProductType.SUBSCRIPTION) {
-              confirmPurchase(paymentResult.purchaseId, promise)
+              confirmPurchase(paymentResult.purchaseId, developerPayload, promise)
               val payRes = Arguments.createMap();
               payRes.putString("purchaseId", paymentResult.purchaseId)
               payRes.putString("productId", paymentResult.productId)
@@ -341,9 +343,10 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
   @ReactMethod
   fun confirmPurchase(
     purchaseId: String,
+    developerPayload: String?,
     promise: Promise
   ) {
-    RuStoreBillingClient.purchases.confirmPurchase(purchaseId)
+    RuStoreBillingClient.purchases.confirmPurchase(purchaseId, developerPayload)
       .addOnSuccessListener { response ->
         val confirmPurchaseResponse = Arguments.createMap()
         confirmPurchaseResponse.putInt("code", response.code)
