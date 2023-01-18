@@ -1,12 +1,18 @@
 import { NativeModules, Platform } from 'react-native';
 
+import type {
+  RuStoreProductStatus,
+  RuStoreProductType,
+  RuStorePurchaseState,
+} from './enums';
+
 const LINKING_ERROR =
   `The package 'react-native-rustore-iap' doesn't seem to be linked. Make sure: \n\n` +
   Platform.select({ ios: "- You have run 'pod install'\n", default: '' }) +
   '- You rebuilt the app after installing the package\n' +
   '- You are not using Expo managed workflow\n';
 
-const RustoreIap = NativeModules.RustoreIap
+const RuStoreIap: RuStoreIapModule = NativeModules.RustoreIap
   ? NativeModules.RustoreIap
   : new Proxy(
       {},
@@ -17,25 +23,34 @@ const RustoreIap = NativeModules.RustoreIap
       }
     );
 
+interface RuStoreIapModule {
+  checkRuStorePurchasesAvailability: () => Promise<Boolean>;
+  purchaseRuStoreProduct: (
+    product: RuStoreProduct
+  ) => Promise<ConfirmPurchaseResponse>;
+  getRuStoreProducts: (productIds: String[]) => Promise<RuStoreProduct[]>;
+  getRuStorePurchases: () => Promise<RuStorePurchase[]>;
+}
+
 export async function checkRuStoreAvailable(): Promise<Boolean> {
-  return await RustoreIap.checkRuStorePurchasesAvailability();
+  return await RuStoreIap.checkRuStorePurchasesAvailability();
+}
+
+export async function purchaseRuStoreProduct(
+  product: RuStoreProduct
+): Promise<ConfirmPurchaseResponse> {
+  return await RuStoreIap.purchaseRuStoreProduct(product);
 }
 
 export async function getRuStoreProducts(
   productsIds: String[]
 ): Promise<RuStoreProduct[]> {
-  return await RustoreIap.getRuStoreProducts(productsIds);
+  return await RuStoreIap.getRuStoreProducts(productsIds);
 }
 
 export async function getRuStorePurchases(): Promise<RuStorePurchase[]> {
-  return await RustoreIap.getRuStorePurchases();
+  return await RuStoreIap.getRuStorePurchases();
 }
-
-import type {
-  RuStoreProductStatus,
-  RuStoreProductType,
-  RuStorePurchaseState,
-} from './enums';
 
 export interface RuStorePurchase {
   purchaseId: string;
@@ -74,6 +89,14 @@ export interface RuStoreProductSubscription {
   introductoryPriceAmount: string;
   introductoryPricePeriod: RuStoreSubscriptionPeriod;
   subscriptionPeriod: RuStoreSubscriptionPeriod;
+}
+
+export interface ConfirmPurchaseResponse {
+  code: number;
+  errorDescription: string;
+  errorMessage: string;
+  errors: string[];
+  traceId: string;
 }
 
 export interface RuStoreSubscriptionPeriod {
