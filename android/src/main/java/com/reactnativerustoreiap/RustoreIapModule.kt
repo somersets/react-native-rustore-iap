@@ -199,7 +199,7 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
 
           nativeProduct.subscription?.freeTrialPeriod?.let {
             freeTrialPeriod.putInt(
-              "day",
+              "days",
               it.days
             )
           }
@@ -216,13 +216,13 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
             )
           }
 
-          nativeProduct.subscription?.gracePeriod?.let { gracePeriod.putInt("day", it.days) }
+          nativeProduct.subscription?.gracePeriod?.let { gracePeriod.putInt("days", it.days) }
           nativeProduct.subscription?.gracePeriod?.let { gracePeriod.putInt("months", it.months) }
           nativeProduct.subscription?.gracePeriod?.let { gracePeriod.putInt("years", it.years) }
 
           nativeProduct.subscription?.introductoryPricePeriod?.let {
             introductoryPricePeriod.putInt(
-              "day",
+              "days",
               it.days
             )
           }
@@ -241,7 +241,7 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
 
           nativeProduct.subscription?.subscriptionPeriod?.let {
             subscriptionPeriod.putInt(
-              "day",
+              "days",
               it.days
             )
           }
