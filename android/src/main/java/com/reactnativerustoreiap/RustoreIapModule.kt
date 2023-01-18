@@ -6,10 +6,8 @@ import ru.rustore.sdk.billingclient.RuStoreBillingClient
 import ru.rustore.sdk.billingclient.model.product.*
 import ru.rustore.sdk.billingclient.model.purchase.PaymentFinishCode
 import ru.rustore.sdk.billingclient.model.purchase.PaymentResult
-import ru.rustore.sdk.billingclient.model.purchase.response.ConfirmPurchaseResponse
 import ru.rustore.sdk.core.feature.model.FeatureAvailabilityResult
 import ru.rustore.sdk.core.tasks.OnCompleteListener
-import java.util.concurrent.Flow.Subscription
 
 
 class RustoreIapModule(reactContext: ReactApplicationContext) :
@@ -132,7 +130,7 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
   ) {
     when (paymentResult) {
       is PaymentResult.InvalidPurchase -> {
-        paymentResult.purchaseId?.let { deletePurchase(it, null) }
+        paymentResult.purchaseId?.let { deleteRuStorePurchase(it, null) }
         val payRes = Arguments.createMap();
         payRes.putString("purchaseId", paymentResult.purchaseId)
         paymentResult.errorCode?.let { payRes.putInt("errorCode", it) }
@@ -163,7 +161,7 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
           PaymentFinishCode.DECLINED_BY_SERVER,
           PaymentFinishCode.RESULT_UNKNOWN,
           -> {
-            deletePurchase(paymentResult.purchaseId, null)
+            deleteRuStorePurchase(paymentResult.purchaseId, null)
           }
         }
       }
@@ -319,7 +317,7 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
-  fun deletePurchase(purchaseId: String, promise: Promise?) {
+  fun deleteRuStorePurchase(purchaseId: String, promise: Promise?) {
     RuStoreBillingClient.purchases.deletePurchase(purchaseId)
       .addOnSuccessListener { response ->
         val deletePurchaseResponse = Arguments.createMap()
