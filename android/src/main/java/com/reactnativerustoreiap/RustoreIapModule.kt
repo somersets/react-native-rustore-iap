@@ -1,39 +1,39 @@
 package com.reactnativerustoreiap
 
-import com.facebook.react.bridge.Callback
-import com.facebook.react.bridge.ReactApplicationContext
-import com.facebook.react.bridge.ReactContextBaseJavaModule
-import com.facebook.react.bridge.ReactMethod
-import com.facebook.react.bridge.Promise
-import com.facebook.react.bridge.ReadableArray
+import com.facebook.react.bridge.*
 import ru.rustore.sdk.billingclient.RuStoreBillingClient
 import ru.rustore.sdk.billingclient.model.product.Product
-import ru.rustore.sdk.billingclient.model.product.ProductsResponse
-import ru.rustore.sdk.billingclient.model.purchase.Purchase
+import ru.rustore.sdk.billingclient.model.product.ProductType
+import ru.rustore.sdk.billingclient.model.purchase.PaymentFinishCode
+import ru.rustore.sdk.billingclient.model.purchase.PaymentResult
+import ru.rustore.sdk.billingclient.model.purchase.response.ConfirmPurchaseResponse
 import ru.rustore.sdk.core.feature.model.FeatureAvailabilityResult
 import ru.rustore.sdk.core.tasks.OnCompleteListener
 
-class RustoreIapModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
+
+class RustoreIapModule(reactContext: ReactApplicationContext) :
+  ReactContextBaseJavaModule(reactContext) {
 
   override fun getName(): String {
     return "RustoreIap"
   }
 
   @ReactMethod
-  fun checkRuStorePurchasesAvailability(cb: Callback) {
+  fun checkRuStorePurchasesAvailability(promise: Promise) {
     RuStoreBillingClient.purchases.checkPurchasesAvailability()
       .addOnCompleteListener(object : OnCompleteListener<FeatureAvailabilityResult> {
         override fun onFailure(throwable: Throwable) {
           // Process error
-          cb.invoke(throwable, null);
+          promise.reject(throwable, null);
         }
+
         override fun onSuccess(result: FeatureAvailabilityResult) {
           when (result) {
             is FeatureAvailabilityResult.Available -> {
-              cb.invoke(null, true);
+              promise.resolve(true);
             }
             is FeatureAvailabilityResult.Unavailable -> {
-              cb.invoke(null, false);
+              promise.resolve(false);
             }
           }
         }
@@ -41,11 +41,62 @@ class RustoreIapModule(reactContext: ReactApplicationContext) : ReactContextBase
   }
 
   @ReactMethod
+  fun purchaseProduct(product: Product, promise: Promise) {
+    RuStoreBillingClient.purchases.purchaseProduct(product.productId)
+      .addOnSuccessListener { paymentResult ->
+        handlePaymentResult(paymentResult, product) { it: Throwable?, response: ConfirmPurchaseResponse? ->
+          if (it != null) {
+            promise.reject(it)
+          } else {
+            promise.resolve(response)
+          }
+        }
+      }
+      .addOnFailureListener {
+        promise.reject(it)
+      }
+  }
+
+  private fun handlePaymentResult(paymentResult: PaymentResult, product: Product, callback: (Throwable?, ConfirmPurchaseResponse?) -> Unit) {
+    when (paymentResult) {
+      is PaymentResult.InvalidPurchase -> {
+        paymentResult.purchaseId?.let { deletePurchase(it) }
+      }
+      is PaymentResult.PurchaseResult -> {
+        when (paymentResult.finishCode) {
+          PaymentFinishCode.SUCCESSFUL_PAYMENT -> {
+            if (product.productType == ProductType.CONSUMABLE) {
+              confirmPurchase(paymentResult.purchaseId) { it: Throwable?, response: ConfirmPurchaseResponse? ->
+                if (it != null) {
+                  callback.invoke(it, null)
+                  throw it;
+                } else {
+                  callback.invoke(null, response)
+                }
+              }
+
+            }
+          }
+          PaymentFinishCode.CLOSED_BY_USER,
+          PaymentFinishCode.UNHANDLED_FORM_ERROR,
+          PaymentFinishCode.PAYMENT_TIMEOUT,
+          PaymentFinishCode.DECLINED_BY_SERVER,
+          PaymentFinishCode.RESULT_UNKNOWN,
+          -> {
+            deletePurchase(paymentResult.purchaseId)
+          }
+        }
+      }
+      else -> Unit
+    }
+  }
+
+  @ReactMethod
   fun getRuStoreProducts(productIds: ReadableArray, promise: Promise) {
     try {
       val ids = productIds.toArrayList().toList() as List<String>;
       val productsResponse = RuStoreBillingClient.products.getProducts(ids).await();
-      promise.resolve(productsResponse.products?.toTypedArray());
+      promise.resolve(productsResponse.products);
     } catch (e: Throwable) {
       promise.reject("Getting products error!", e);
     }
@@ -55,10 +106,28 @@ class RustoreIapModule(reactContext: ReactApplicationContext) : ReactContextBase
   fun getRuStorePurchases(promise: Promise) {
     try {
       val purchaseResponse = RuStoreBillingClient.purchases.getPurchases().await();
-      promise.resolve(purchaseResponse.purchases?.toTypedArray());
+      promise.resolve(purchaseResponse.purchases);
     } catch (e: Throwable) {
       promise.reject("Getting products error!", e);
     }
+  }
+
+  private fun deletePurchase(purchaseId: String){
+    RuStoreBillingClient.purchases.deletePurchase(purchaseId)
+      .addOnSuccessListener { response ->
+      }
+      .addOnFailureListener {
+      }
+  }
+
+  private fun confirmPurchase(purchaseId: String, callback: (Throwable?, ConfirmPurchaseResponse?) -> Unit) {
+    RuStoreBillingClient.purchases.confirmPurchase(purchaseId)
+      .addOnSuccessListener { response ->
+        callback.invoke(null, response);
+      }
+      .addOnFailureListener {
+        callback.invoke(it, null);
+      }
   }
 
 }
