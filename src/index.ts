@@ -31,7 +31,9 @@ interface RuStoreIapModule {
   getRuStoreProducts: (productIds: String[]) => Promise<RuStoreProduct[]>;
   getRuStorePurchases: () => Promise<RuStorePurchase[]>;
   confirmRuStorePurchase: () => Promise<ConfirmPurchaseResponse>;
-  deleteRuStorePurchase: (purchaseId: number) => Promise<DeletePurchaseResponse>;
+  deleteRuStorePurchase: (
+    purchaseId: string
+  ) => Promise<DeletePurchaseResponse>;
 }
 
 export async function checkRuStoreAvailable(): Promise<Boolean> {
@@ -43,7 +45,7 @@ export async function confirmRuStorePurchase(): Promise<ConfirmPurchaseResponse>
 }
 
 export async function deleteRuStorePurchase(
-  purchaseId: number
+  purchaseId: string
 ): Promise<DeletePurchaseResponse> {
   return await RuStoreIap.deleteRuStorePurchase(purchaseId);
 }
