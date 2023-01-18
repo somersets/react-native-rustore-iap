@@ -44,7 +44,10 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
   fun purchaseProduct(product: Product, promise: Promise) {
     RuStoreBillingClient.purchases.purchaseProduct(product.productId)
       .addOnSuccessListener { paymentResult ->
-        handlePaymentResult(paymentResult, product) { it: Throwable?, response: ConfirmPurchaseResponse? ->
+        handlePaymentResult(
+          paymentResult,
+          product
+        ) { it: Throwable?, response: ConfirmPurchaseResponse? ->
           if (it != null) {
             promise.reject(it)
           } else {
@@ -57,7 +60,11 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
       }
   }
 
-  private fun handlePaymentResult(paymentResult: PaymentResult, product: Product, callback: (Throwable?, ConfirmPurchaseResponse?) -> Unit) {
+  private fun handlePaymentResult(
+    paymentResult: PaymentResult,
+    product: Product,
+    callback: (Throwable?, ConfirmPurchaseResponse?) -> Unit
+  ) {
     when (paymentResult) {
       is PaymentResult.InvalidPurchase -> {
         paymentResult.purchaseId?.let { deletePurchase(it) }
@@ -94,13 +101,109 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
   @ReactMethod
   fun getRuStoreProducts(productIds: ReadableArray, promise: Promise) {
     try {
-      val nativeArrayListIds: ArrayList<String> = ArrayList()
+      val ids = productIds.toArrayList().toList() as List<String>
+      val productsResponse = RuStoreBillingClient.products.getProducts(ids).await();
 
-      for (i in 0 until productIds.size()) {
-        nativeArrayListIds.add(productIds.getString(i))
+      val products = Arguments.createArray()
+
+      productsResponse.products?.let { it ->
+        for (nativeProduct in it) {
+          val product = Arguments.createMap()
+          val subscription = Arguments.createMap()
+          val freeTrialPeriod = Arguments.createMap()
+          val gracePeriod = Arguments.createMap()
+          val introductoryPricePeriod = Arguments.createMap()
+          val subscriptionPeriod = Arguments.createMap()
+
+          product.putString("productId", nativeProduct.productId)
+          product.putString("productType", nativeProduct.productType.toString())
+          product.putString("productStatus", nativeProduct.productStatus.toString())
+          product.putString("priceLabel", nativeProduct.priceLabel)
+          nativeProduct.price?.let { product.putInt("price", it) }
+          product.putString("currency", nativeProduct.currency)
+          product.putString("language", nativeProduct.language)
+          product.putString("title", nativeProduct.title)
+          product.putString("description", nativeProduct.description)
+          product.putString("imageUrl", nativeProduct.imageUrl.toString())
+          product.putString("promoImageUrl", nativeProduct.promoImageUrl.toString())
+          subscription.putString("introductoryPrice", nativeProduct.subscription?.introductoryPrice)
+          subscription.putString(
+            "introductoryPriceAmount",
+            nativeProduct.subscription?.introductoryPriceAmount
+          )
+
+          nativeProduct.subscription?.freeTrialPeriod?.let {
+            freeTrialPeriod.putInt(
+              "day",
+              it.days
+            )
+          }
+          nativeProduct.subscription?.freeTrialPeriod?.let {
+            freeTrialPeriod.putInt(
+              "months",
+              it.months
+            )
+          }
+          nativeProduct.subscription?.freeTrialPeriod?.let {
+            freeTrialPeriod.putInt(
+              "years",
+              it.years
+            )
+          }
+
+          nativeProduct.subscription?.gracePeriod?.let { gracePeriod.putInt("day", it.days) }
+          nativeProduct.subscription?.gracePeriod?.let { gracePeriod.putInt("months", it.months) }
+          nativeProduct.subscription?.gracePeriod?.let { gracePeriod.putInt("years", it.years) }
+
+          nativeProduct.subscription?.introductoryPricePeriod?.let {
+            introductoryPricePeriod.putInt(
+              "day",
+              it.days
+            )
+          }
+          nativeProduct.subscription?.introductoryPricePeriod?.let {
+            introductoryPricePeriod.putInt(
+              "months",
+              it.months
+            )
+          }
+          nativeProduct.subscription?.introductoryPricePeriod?.let {
+            introductoryPricePeriod.putInt(
+              "years",
+              it.years
+            )
+          }
+
+          nativeProduct.subscription?.subscriptionPeriod?.let {
+            subscriptionPeriod.putInt(
+              "day",
+              it.days
+            )
+          }
+          nativeProduct.subscription?.subscriptionPeriod?.let {
+            subscriptionPeriod.putInt(
+              "months",
+              it.months
+            )
+          }
+          nativeProduct.subscription?.subscriptionPeriod?.let {
+            subscriptionPeriod.putInt(
+              "years",
+              it.years
+            )
+          }
+
+          subscription.putMap("freeTrialPeriod", freeTrialPeriod)
+          subscription.putMap("gracePeriod", gracePeriod)
+          subscription.putMap("introductoryPricePeriod", introductoryPricePeriod)
+          subscription.putMap("subscriptionPeriod", subscriptionPeriod)
+          product.putMap("subscription", subscription)
+          products.pushMap(product)
+        }
+
       }
-      val productsResponse = RuStoreBillingClient.products.getProducts(nativeArrayListIds.toList()).await();
-      promise.resolve(productsResponse.products);
+
+      promise.resolve(products);
     } catch (e: Throwable) {
       promise.reject("Getting products error!", e);
     }
@@ -109,14 +212,40 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
   @ReactMethod
   fun getRuStorePurchases(promise: Promise) {
     try {
-      val purchaseResponse = RuStoreBillingClient.purchases.getPurchases().await();
+      val purchaseResponse = RuStoreBillingClient.purchases.getPurchases().await()
+      val purchases = Arguments.createArray()
+
+      purchaseResponse.purchases?.let { it ->
+        for (nativeProduct in it) {
+          val purchase = Arguments.createMap()
+
+          purchase.putString("purchaseId", nativeProduct.purchaseId)
+          purchase.putString("productId", nativeProduct.productId)
+          purchase.putString("description", nativeProduct.description)
+          purchase.putString("language", nativeProduct.language)
+          purchase.putString("purchaseTime", nativeProduct.purchaseTime.toString())
+          purchase.putString("orderId", nativeProduct.orderId)
+          purchase.putString("amountLabel", nativeProduct.amountLabel)
+          nativeProduct.amount?.let { purchase.putInt("amount", it) }
+          purchase.putString("currency", nativeProduct.currency)
+          nativeProduct.quantity?.let { purchase.putInt("quantity", it) }
+          purchase.putString("purchaseState", nativeProduct.purchaseState.toString())
+          purchase.putString(
+            "developerPayload",
+            nativeProduct.developerPayload
+          )
+
+          purchases.pushMap(purchase)
+        }
+      }
+
       promise.resolve(purchaseResponse.purchases);
     } catch (e: Throwable) {
       promise.reject("Getting products error!", e);
     }
   }
 
-  private fun deletePurchase(purchaseId: String){
+  private fun deletePurchase(purchaseId: String) {
     RuStoreBillingClient.purchases.deletePurchase(purchaseId)
       .addOnSuccessListener { response ->
       }
@@ -124,7 +253,10 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
       }
   }
 
-  private fun confirmPurchase(purchaseId: String, callback: (Throwable?, ConfirmPurchaseResponse?) -> Unit) {
+  private fun confirmPurchase(
+    purchaseId: String,
+    callback: (Throwable?, ConfirmPurchaseResponse?) -> Unit
+  ) {
     RuStoreBillingClient.purchases.confirmPurchase(purchaseId)
       .addOnSuccessListener { response ->
         callback.invoke(null, response);
