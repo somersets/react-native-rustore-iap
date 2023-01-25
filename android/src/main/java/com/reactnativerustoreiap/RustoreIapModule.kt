@@ -42,7 +42,7 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
   @ReactMethod
   fun purchaseRuStoreProduct(product: ReadableMap, developerPayload: String?, promise: Promise) {
     val subscription = product.getMap("subscription")
-
+    val devPayload = developerPayload;
     val freeTrialPeriod = subscription?.getMap("freeTrialPeriod")
     val gracePeriod = subscription?.getMap("gracePeriod")
     val introductoryPricePeriod = subscription?.getMap("introductoryPricePeriod");
@@ -115,7 +115,7 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
         handlePaymentResult(
           paymentResult,
           nativeProduct,
-          developerPayload,
+          devPayload,
           promise,
         )
       }
