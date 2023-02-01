@@ -113,14 +113,6 @@ export interface RuStoreProductSubscription {
   subscriptionPeriod: RuStoreSubscriptionPeriod;
 }
 
-export interface ConfirmPurchaseResponse {
-  code: number;
-  errorDescription: string;
-  errorMessage: string;
-  errors: string[];
-  traceId: string;
-}
-
 interface PaymentResult {
   purchaseId: string;
   productId: string;
@@ -129,10 +121,19 @@ interface PaymentResult {
   finishCode: string;
 }
 
-export interface DeletePurchaseResponse {
+interface ResponseWithCode {
   code: number;
-  errorMessage: string;
   errorDescription: string;
+  errorMessage: string;
+  errors: string[];
+  meta: RequestMeta;
+}
+
+export interface ConfirmPurchaseResponse extends ResponseWithCode {}
+
+export interface DeletePurchaseResponse extends ResponseWithCode {}
+
+export interface RequestMeta {
   traceId: string;
 }
 

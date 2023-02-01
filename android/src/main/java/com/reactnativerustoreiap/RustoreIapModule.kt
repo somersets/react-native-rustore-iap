@@ -330,10 +330,16 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
     RuStoreBillingClient.purchases.deletePurchase(purchaseId)
       .addOnSuccessListener { response ->
         val deletePurchaseResponse = Arguments.createMap()
+        val responseMeta = Arguments.createMap();
+
+        responseMeta.putString("traceId", response.meta?.traceId)
+
         deletePurchaseResponse.putInt("code", response.code)
         deletePurchaseResponse.putString("errorDescription", response.errorDescription)
-        deletePurchaseResponse.putString("traceId", response.traceId)
         deletePurchaseResponse.putString("errorMessage", response.errorMessage)
+
+        deletePurchaseResponse.putMap("meta", responseMeta)
+
         promise?.resolve(deletePurchaseResponse)
       }
       .addOnFailureListener {
@@ -349,10 +355,17 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
     RuStoreBillingClient.purchases.confirmPurchase(purchaseId, developerPayload)
       .addOnSuccessListener { response ->
         val confirmPurchaseResponse = Arguments.createMap()
+
+        val responseMeta = Arguments.createMap();
+
+        responseMeta.putString("traceId", response.meta?.traceId)
+
         confirmPurchaseResponse.putInt("code", response.code)
         confirmPurchaseResponse.putString("errorDescription", response.errorDescription)
-        confirmPurchaseResponse.putString("traceId", response.traceId)
         confirmPurchaseResponse.putString("errorMessage", response.errorMessage)
+
+        confirmPurchaseResponse.putMap("meta", responseMeta)
+
         promise.resolve(confirmPurchaseResponse)
       }
       .addOnFailureListener {
