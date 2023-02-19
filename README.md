@@ -1,12 +1,34 @@
 # React Native RuStore IAP
-Данная библиотека является оберткой над RuStore SDK для ReactNative
+Данная библиотека является оберткой над RuStore SDK
 
 ## Installation
-
 
 ```sh
 npm install react-native-rustore-iap
 ```
+
+```
+android/build.gradle
+
+allprojects {
+    repositories {
+        ...
+        maven {
+            url("https://artifactory-external.vkpartner.ru/artifactory/maven")
+        }
+    }
+}
+```
+---
+```
+android/app/build.gradle
+
+dependencies {
+    ...
+    implementation("ru.rustore.sdk:billingclient:0.1.7")
+}
+```
+---
 
 ## Usage
 
@@ -24,7 +46,7 @@ npm install react-native-rustore-iap
 4. Пользователь и приложение не должны быть заблокированы в RuStore.
 
 5. Для приложения должна быть включена возможность покупок в системе RuStore Консоль.
-```js
+```ts
 import { checkRuStoreAvailable } from '@somersets/react-native-rustore-iap';
 
 const isRuStoreAvailable: Boolean = await checkRuStoreAvailable();
