@@ -1,7 +1,7 @@
 # React Native RuStore IAP
 Данная библиотека является оберткой над RuStore SDK
 
-## Installation
+## Установка
 
 ```sh
 npm install react-native-rustore-iap
@@ -30,7 +30,7 @@ dependencies {
 ```
 ---
 
-## Usage
+## Использование
 
 ## Проверка доступности работы с платежами
 Для проверки доступности платежей вызовите метод checkRuStorePurchasesAvailability.
@@ -46,6 +46,15 @@ dependencies {
 4. Пользователь и приложение не должны быть заблокированы в RuStore.
 
 5. Для приложения должна быть включена возможность покупок в системе RuStore Консоль.
+
+## Инициализация модуля
+```ts
+import { initializeRuStore } from '@somersets/react-native-rustore-iap';
+
+initializeRuStore(YOUR_CONSOLE_APP_ID);
+```
+
+## Проверка доступности работы
 ```ts
 import { checkRuStoreAvailable } from '@somersets/react-native-rustore-iap';
 
