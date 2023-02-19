@@ -1,14 +1,12 @@
 package com.reactnativerustoreiap
 
 import android.app.Application
-import android.content.Intent
 import android.net.Uri
 import com.facebook.react.bridge.*
 import ru.rustore.sdk.billingclient.RuStoreBillingClient
 import ru.rustore.sdk.billingclient.model.product.*
 import ru.rustore.sdk.billingclient.model.purchase.PaymentFinishCode
 import ru.rustore.sdk.billingclient.model.purchase.PaymentResult
-import ru.rustore.sdk.billingclient.provider.logger.ExternalPaymentLoggerFactory
 import ru.rustore.sdk.core.feature.model.FeatureAvailabilityResult
 import ru.rustore.sdk.core.tasks.OnCompleteListener
 
@@ -28,22 +26,26 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
     externalPaymentLoggerFactory: Boolean,
   ) {
     if (externalPaymentLoggerFactory) {
-      RuStoreBillingClient.init(
-        application,
-        consoleAppId,
-        deeplinkScheme,
-        externalPaymentLoggerFactory = { tag -> PaymentLogger(tag) },
-        true,
-      )
+      currentActivity?.let {
+        RuStoreBillingClient.init(
+          it.application,
+          consoleAppId,
+          deeplinkScheme,
+          externalPaymentLoggerFactory = { tag -> PaymentLogger(tag) },
+          true,
+        )
+      }
       return
     }
-    RuStoreBillingClient.init(
-      application,
-      consoleAppId,
-      deeplinkScheme,
-      null,
-      false,
-    )
+    currentActivity?.let {
+      RuStoreBillingClient.init(
+        it.application,
+        consoleAppId,
+        deeplinkScheme,
+        null,
+        false,
+      )
+    }
   }
 
   @ReactMethod
