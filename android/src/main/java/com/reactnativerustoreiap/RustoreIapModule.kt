@@ -20,7 +20,6 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
 
   @ReactMethod
   fun initializeRuStore(
-    application: Application,
     consoleAppId: String,
     deeplinkScheme: String,
     externalPaymentLoggerFactory: Boolean,
