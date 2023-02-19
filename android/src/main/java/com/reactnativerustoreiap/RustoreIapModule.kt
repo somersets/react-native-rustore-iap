@@ -22,8 +22,9 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
   fun initializeRuStore(
     consoleAppId: String,
     deeplinkScheme: String,
-    externalPaymentLoggerFactory: Boolean,
+    externalPaymentLoggerFactory: Boolean = false,
   ) {
+    if (RuStoreBillingClient.isInitialized) return;
     if (externalPaymentLoggerFactory) {
       currentActivity?.let {
         RuStoreBillingClient.init(
@@ -34,16 +35,16 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
           true,
         )
       }
-      return
-    }
-    currentActivity?.let {
-      RuStoreBillingClient.init(
-        it.application,
-        consoleAppId,
-        deeplinkScheme,
-        null,
-        false,
-      )
+    } else {
+      currentActivity?.let {
+        RuStoreBillingClient.init(
+          it.application,
+          consoleAppId,
+          deeplinkScheme,
+          null,
+          false,
+        )
+      }
     }
   }
 
