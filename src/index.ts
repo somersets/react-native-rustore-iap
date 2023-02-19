@@ -50,7 +50,7 @@ export async function checkRuStoreAvailable(): Promise<Boolean> {
 }
 
 export function initializeRuStore(
-  consoleAppId: string,
+  consoleAppId: string = '',
   deepLinkScheme: string = '',
   externalPaymentLoggerFactory: boolean = false
 ): void {
