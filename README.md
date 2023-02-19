@@ -1,5 +1,8 @@
 # React Native RuStore IAP
+Данная библиотека является оберткой над RuStore SDK для ReactNative
+
 ## Installation
+
 
 ```sh
 npm install react-native-rustore-iap
