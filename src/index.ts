@@ -25,6 +25,11 @@ const RuStoreIap: RuStoreIapModule = NativeModules.RustoreIap
 
 interface RuStoreIapModule {
   checkRuStorePurchasesAvailability: () => Promise<Boolean>;
+  initializeRuStore: (
+    consoleAppId: string,
+    deepLinkScheme?: string,
+    externalPaymentLoggerFactory?: boolean
+  ) => void;
   purchaseRuStoreProduct: (
     product: RuStoreProduct,
     developerPayload?: string
@@ -42,6 +47,18 @@ interface RuStoreIapModule {
 
 export async function checkRuStoreAvailable(): Promise<Boolean> {
   return await RuStoreIap.checkRuStorePurchasesAvailability();
+}
+
+export function initializeRuStore(
+  consoleAppId: string = '',
+  deepLinkScheme: string = '',
+  externalPaymentLoggerFactory: boolean = false
+): void {
+  RuStoreIap.initializeRuStore(
+    consoleAppId,
+    deepLinkScheme,
+    externalPaymentLoggerFactory
+  );
 }
 
 export async function confirmRuStorePurchase(
@@ -87,6 +104,7 @@ export interface RuStorePurchase {
   quantity: number;
   purchaseState: RuStorePurchaseState;
   developerPayload: string;
+  subscriptionToken: string;
 }
 
 export interface RuStoreProduct {
