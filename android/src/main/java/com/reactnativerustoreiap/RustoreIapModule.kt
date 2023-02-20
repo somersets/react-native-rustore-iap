@@ -369,23 +369,27 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
 
   @ReactMethod
   fun deleteRuStorePurchase(purchaseId: String, promise: Promise?) {
-    RuStoreBillingClient.purchases.deletePurchase(purchaseId)
-      .addOnSuccessListener { response ->
-        val deletePurchaseResponse = Arguments.createMap()
-        val responseMeta = Arguments.createMap()
+    try {
+      RuStoreBillingClient.purchases.deletePurchase(purchaseId)
+        .addOnSuccessListener { response ->
+          val deletePurchaseResponse = Arguments.createMap()
+          val responseMeta = Arguments.createMap()
 
-        responseMeta.putString("traceId", response.meta?.traceId)
+          responseMeta.putString("traceId", response.meta?.traceId)
 
-        deletePurchaseResponse.putInt("code", response.code)
-        deletePurchaseResponse.putString("errorDescription", response.errorDescription)
-        deletePurchaseResponse.putString("errorMessage", response.errorMessage)
+          deletePurchaseResponse.putInt("code", response.code)
+          deletePurchaseResponse.putString("errorDescription", response.errorDescription)
+          deletePurchaseResponse.putString("errorMessage", response.errorMessage)
 
-        deletePurchaseResponse.putMap("meta", responseMeta)
+          deletePurchaseResponse.putMap("meta", responseMeta)
 
-        promise?.resolve(deletePurchaseResponse)
-      }
-      .addOnFailureListener {
-      }
+          promise?.resolve(deletePurchaseResponse)
+        }
+        .addOnFailureListener {
+        }
+    } catch (e: Throwable) {
+      promise?.reject("On delete purchase error!", e)
+    }
   }
 
   @ReactMethod
