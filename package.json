@@ -44,7 +44,7 @@
   },
   "homepage": "https://github.com/somersets/react-native-rustore-iap#readme",
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com/@somersets"
+    "access": "public"
   },
   "devDependencies": {
     "@arkweid/lefthook": "^0.7.7",
