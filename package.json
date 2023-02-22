@@ -33,7 +33,10 @@
     "ios",
     "android"
   ],
-  "repository": "https://github.com/somersets/react-native-rustore-iap",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/somersets/react-native-rustore-iap.git"
+  },
   "author": "Nikita Likhachev <facelessmay@gmail.com> (https://github.com/somersets)",
   "license": "MIT",
   "bugs": {
@@ -41,7 +44,7 @@
   },
   "homepage": "https://github.com/somersets/react-native-rustore-iap#readme",
   "publishConfig": {
-    "registry": "https://registry.npmjs.org"
+    "registry": "https://npm.pkg.github.com/@somersets"
   },
   "devDependencies": {
     "@arkweid/lefthook": "^0.7.7",
