@@ -1,6 +1,6 @@
 {
   "name": "@somersets/react-native-rustore-iap",
-  "version": "0.4.9",
+  "version": "0.5.0",
   "description": "test",
   "main": "./lib/module/index.js",
   "module": "./lib/module/index.js",
@@ -41,7 +41,7 @@
   },
   "homepage": "https://github.com/somersets/react-native-rustore-iap#readme",
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com/somersets"
+    "registry": "https://registry.npmjs.org"
   },
   "devDependencies": {
     "@arkweid/lefthook": "^0.7.7",
