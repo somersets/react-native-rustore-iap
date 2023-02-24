@@ -11,6 +11,8 @@ jsconfig.json
 
 # Xcode
 #
+ios
+react-native-rustore-iap.podspec
 build/
 *.pbxuser
 !default.pbxuser
