@@ -28,6 +28,12 @@ dependencies {
     implementation("ru.rustore.sdk:billingclient:0.1.7")
 }
 ```
+
+
+Для корректной установки pod'ов нужно установить зависимость в modular_headers => false
+```
+pod 'react-native-rustore-iap', :podspec => '../node_modules/react-native-rustore-iap/react-native-rustore-iap.podspec', :modular_headers => false
+```
 ---
 
 ## Использование
