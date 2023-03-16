@@ -64,8 +64,9 @@ initializeRuStore(YOUR_CONSOLE_APP_ID);
 ```ts
 import { checkRuStoreAvailable } from '@somersets/react-native-rustore-iap';
 
-const isRuStoreAvailable: Boolean = await checkRuStoreAvailable();
+const isRuStoreAvailable: Boolean | String = await checkRuStoreAvailable();
 ```
+Обработка ошибок (https://help.rustore.ru/rustore/for_developers/developer-documentation/sdk_payments/SDK-connecting-payments/Error-processing)
 
 ## Получение актуальной информации по списку продуктов
 
