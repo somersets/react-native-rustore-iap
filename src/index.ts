@@ -24,7 +24,7 @@ const RuStoreIap: RuStoreIapModule = NativeModules.RustoreIap
     );
 
 interface RuStoreIapModule {
-  checkRuStorePurchasesAvailability: () => Promise<Boolean>;
+  checkRuStorePurchasesAvailability: () => Promise<Boolean | String>;
   initializeRuStore: (
     consoleAppId: string,
     deepLinkScheme?: string,
@@ -45,7 +45,7 @@ interface RuStoreIapModule {
   ) => Promise<DeletePurchaseResponse>;
 }
 
-export async function checkRuStoreAvailable(): Promise<Boolean> {
+export async function checkRuStoreAvailable(): Promise<Boolean | String> {
   return await RuStoreIap.checkRuStorePurchasesAvailability();
 }
 

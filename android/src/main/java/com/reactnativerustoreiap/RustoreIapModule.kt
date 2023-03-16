@@ -63,7 +63,7 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
               promise.resolve(true)
             }
             is FeatureAvailabilityResult.Unavailable -> {
-              promise.resolve(false)
+              promise.resolve(result.cause.message)
             }
           }
         }
