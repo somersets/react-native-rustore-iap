@@ -50,6 +50,8 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
 
   @ReactMethod
   fun checkRuStorePurchasesAvailability(promise: Promise) {
+    if (!RuStoreBillingClient.isInitialized) return;
+
     RuStoreBillingClient.purchases.checkPurchasesAvailability()
       .addOnCompleteListener(object : OnCompleteListener<FeatureAvailabilityResult> {
         override fun onFailure(throwable: Throwable) {
@@ -72,6 +74,8 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
 
   @ReactMethod
   fun purchaseRuStoreProduct(product: ReadableMap, developerPayload: String?, promise: Promise) {
+    if (!RuStoreBillingClient.isInitialized) return;
+
     val subscription = product.getMap("subscription")
     val freeTrialPeriod = subscription?.getMap("freeTrialPeriod")
     val gracePeriod = subscription?.getMap("gracePeriod")
@@ -160,6 +164,8 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
     developerPayload: String?,
     promise: Promise
   ) {
+    if (!RuStoreBillingClient.isInitialized) return;
+
     when (paymentResult) {
       is PaymentResult.InvalidPurchase -> {
         paymentResult.purchaseId?.let { deleteRuStorePurchase(it, null) }
@@ -211,6 +217,8 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
 
   @ReactMethod
   fun getRuStoreProducts(productIds: ReadableArray, promise: Promise) {
+    if (!RuStoreBillingClient.isInitialized) return;
+
     try {
       val ids = productIds.toArrayList().toList() as List<String>
       val productsResponse = RuStoreBillingClient.products.getProducts(ids).await()
@@ -332,6 +340,8 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
 
   @ReactMethod
   fun getRuStorePurchases(promise: Promise) {
+    if (!RuStoreBillingClient.isInitialized) return;
+
     try {
       val purchaseResponse = RuStoreBillingClient.purchases.getPurchases().await()
       val purchases = Arguments.createArray()
@@ -369,6 +379,8 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
 
   @ReactMethod
   fun deleteRuStorePurchase(purchaseId: String, promise: Promise?) {
+    if (!RuStoreBillingClient.isInitialized) return;
+
     try {
       RuStoreBillingClient.purchases.deletePurchase(purchaseId)
         .addOnSuccessListener { response ->
@@ -398,6 +410,8 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
     developerPayload: String?,
     promise: Promise
   ) {
+    if (!RuStoreBillingClient.isInitialized) return;
+
     RuStoreBillingClient.purchases.confirmPurchase(purchaseId, developerPayload)
       .addOnSuccessListener { response ->
         val confirmPurchaseResponse = Arguments.createMap()

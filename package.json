@@ -1,6 +1,6 @@
 {
   "name": "@somersets/react-native-rustore-iap",
-  "version": "0.7.1",
+  "version": "0.7.3",
   "description": "test",
   "main": "./lib/module/index.js",
   "module": "./lib/module/index.js",
