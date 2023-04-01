@@ -1,1 +1,1 @@
-module.exports = require('./plugin/build/withRustore');
+module.exports = require('./plugin/build');

@@ -1,6 +1,5 @@
 import {
   ConfigPlugin,
-  createRunOncePlugin,
   withAppBuildGradle,
   withProjectBuildGradle,
 } from '@expo/config-plugins';
@@ -9,8 +8,6 @@ import {
   MergeResults,
   removeGeneratedContents,
 } from '@expo/config-plugins/build/utils/generateCode';
-
-const pkg = require('../../package.json');
 
 const gradleMaven = [
   `allprojects { repositories { maven { url("https://artifactory-external.vkpartner.ru/artifactory/maven") } } }`,
@@ -56,7 +53,7 @@ const withRuStoreAppGradle: ConfigPlugin = (config) => {
   });
 };
 
-const withRuStore: ConfigPlugin = (config) => {
+const index: ConfigPlugin = (config) => {
   config = withRuStoreAppGradle(config);
   config = withRuStoreBuildGradle(config);
 
@@ -96,4 +93,4 @@ function appendContents({
   return { contents: src, didClear: false, didMerge: false };
 }
 
-export default createRunOncePlugin(withRuStore, pkg.name, pkg.version);
+export default index;
