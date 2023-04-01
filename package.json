@@ -1,12 +1,14 @@
 {
   "name": "@somersets/react-native-rustore-iap",
-  "version": "0.7.4",
+  "version": "0.8.0",
   "description": "test",
   "main": "./lib/module/index.js",
   "module": "./lib/module/index.js",
   "types": "./lib/typescript/index.d.ts",
   "files": [
     "lib",
+    "plugin/build",
+    "app.plugin.js",
     "android",
     "ios",
     "cpp",
@@ -147,5 +149,11 @@
         }
       ]
     ]
+  },
+  "dependencies": {
+    "@expo/config-plugins": "^6.0.1"
+  },
+  "directories": {
+    "lib": "lib"
   }
 }
