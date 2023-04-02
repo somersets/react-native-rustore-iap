@@ -28,7 +28,7 @@ dependencies {
     implementation("ru.rustore.sdk:billingclient:0.1.7")
 }
 ```
-
+При разработке локально дебаг билд нужно подписывать тем кейстором, который использовался при загрузке приложения в RuStore Console.
 
 Для корректной установки pod'ов нужно установить зависимость в modular_headers => false
 ```
