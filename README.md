@@ -4,7 +4,7 @@
 ## Установка
 
 ```sh
-npm install @somersets/react-native-rustore-iap
+npm install @devsomersets/react-native-rustore-iap
 ```
 
 ```
