@@ -34,6 +34,25 @@ dependencies {
 ```
 pod 'react-native-rustore-iap', :podspec => '../node_modules/react-native-rustore-iap/react-native-rustore-iap.podspec', :modular_headers => false
 ```
+
+## Expo plugin
+Поддержка Managed проектов Expo c expo-config-plugin
+
+```
+app.json
+...
+"plugins": [
+      ["@devsomersets/react-native-rustore-iap"],
+      ["expo-build-properties",
+      {
+        "android": {
+          "minSdkVersion": 23
+        }
+      }
+    ]],
+...
+```
+
 ---
 
 ## Использование
