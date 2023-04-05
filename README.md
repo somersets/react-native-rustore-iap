@@ -55,8 +55,6 @@ app.json
 
 ---
 
-## Использование
-
 ## Проверка доступности работы с платежами
 Для проверки доступности платежей вызовите метод checkRuStorePurchasesAvailability.
 
@@ -72,16 +70,44 @@ app.json
 
 5. Для приложения должна быть включена возможность покупок в системе RuStore Консоль.
 
+## Использование
+
+```tsx
+import { initializeRuStore, checkRuStoreAvailable } from '@devsomersets/react-native-rustore-iap';
+import { useEffect } from 'react';
+import { View } from 'react-native';
+
+const YOUR_APP_ID: string = "YOUR_RUSTORE_CONSOLE_APP_ID";
+
+function App() {
+  useEffect(() => {
+    initializeRuStore(YOUR_APP_ID);
+    checkRuStoreAvailable().then((isAvailable) => {
+      if (typeof isAvailable === "string") {
+        // handle error
+        // (https://help.rustore.ru/rustore/for_developers/developer-documentation/sdk_payments/SDK-connecting-payments/Error-processing)
+      } else {
+        // isAvailable will be true
+      }
+    })
+
+  }, []);
+
+  return <View />;
+}
+
+```
+
 ## Инициализация модуля
 ```ts
-import { initializeRuStore } from '@somersets/react-native-rustore-iap';
+import { initializeRuStore } from '@devsomersets/react-native-rustore-iap';
 
 initializeRuStore(YOUR_CONSOLE_APP_ID);
 ```
 
 ## Проверка доступности работы
 ```ts
-import { checkRuStoreAvailable } from '@somersets/react-native-rustore-iap';
+import { checkRuStoreAvailable } from '@devsomersets/react-native-rustore-iap';
 
 const isRuStoreAvailable: Boolean | String = await checkRuStoreAvailable();
 ```
@@ -92,7 +118,7 @@ const isRuStoreAvailable: Boolean | String = await checkRuStoreAvailable();
 Для получения списка продуктов используйте метод getProducts:
 
 ```ts
-import { getRuStoreProducts } from '@somersets/react-native-rustore-iap';
+import { getRuStoreProducts } from '@devsomersets/react-native-rustore-iap';
 
 const products: RuStoreProduct[] = await getRuStoreProducts(productsIds: String[]);
 ```
@@ -101,7 +127,7 @@ const products: RuStoreProduct[] = await getRuStoreProducts(productsIds: String[
 ## Получение списка покупок пользователя
 
 ```ts
-import { getRuStorePurchases } from '@somersets/react-native-rustore-iap';
+import { getRuStorePurchases } from '@devsomersets/react-native-rustore-iap';
 
 const products: RuStorePurchase[] = await getRuStorePurchases();
 ```
@@ -109,7 +135,7 @@ const products: RuStorePurchase[] = await getRuStorePurchases();
 ## Покупка продукта
 
 ```ts
-import { purchaseRuStoreProduct } from '@somersets/react-native-rustore-iap';
+import { purchaseRuStoreProduct } from '@devsomersets/react-native-rustore-iap';
 
 const purchaseResult: PaymentResult | InvalidPurchaseResult = await purchaseRuStoreProduct(product: RuStoreProduct, developerPayload?: string);
 ```
@@ -117,7 +143,7 @@ const purchaseResult: PaymentResult | InvalidPurchaseResult = await purchaseRuSt
 ## Потребление покупки
 
 ```ts
-import { confirmRuStorePurchase } from '@somersets/react-native-rustore-iap';
+import { confirmRuStorePurchase } from '@devsomersets/react-native-rustore-iap';
 
 const confirmResponse: ConfirmPurchaseResponse = await confirmRuStorePurchase(purchaseId: string, developerPayload?: string);
 ```
@@ -125,7 +151,7 @@ const confirmResponse: ConfirmPurchaseResponse = await confirmRuStorePurchase(pu
 ## Отмена покупки
 
 ```ts
-import { deleteRuStorePurchase } from '@somersets/react-native-rustore-iap';
+import { deleteRuStorePurchase } from '@devsomersets/react-native-rustore-iap';
 
 const deletePurchaseResponse: DeletePurchaseResponse = await deleteRuStorePurchase(purchaseId: string);
 ```
