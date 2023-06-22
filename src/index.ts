@@ -36,6 +36,7 @@ interface RuStoreIapModule {
   ) => Promise<PaymentResult | InvalidPurchaseResult>;
   getRuStoreProducts: (productIds: String[]) => Promise<RuStoreProduct[]>;
   getRuStorePurchases: () => Promise<RuStorePurchase[]>;
+  getRuStorePurchase: (purchaseId: string) => Promise<RuStorePurchase>;
   confirmRuStorePurchase: (
     purchaseId: string,
     developerPayload?: string
@@ -91,6 +92,12 @@ export async function getRuStorePurchases(): Promise<RuStorePurchase[]> {
   return await RuStoreIap.getRuStorePurchases();
 }
 
+export async function getRuStorePurchase(
+  purchaseId: string
+): Promise<RuStorePurchase> {
+  return await RuStoreIap.getRuStorePurchase(purchaseId);
+}
+
 export interface RuStorePurchase {
   purchaseId: string;
   productId: string;
@@ -137,6 +144,7 @@ interface PaymentResult {
   orderId: string;
   subscriptionToken: string;
   finishCode: string;
+  invoiceId: string;
 }
 
 interface ResponseWithCode {
