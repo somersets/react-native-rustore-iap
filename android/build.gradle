@@ -134,7 +134,7 @@ def kotlin_version = getExtOrDefault('kotlinVersion')
 dependencies {
     //noinspection GradleDynamicVersion
   implementation "com.facebook.react:react-native:+"
-  implementation("ru.rustore.sdk:billingclient:0.1.7")
+  implementation("ru.rustore.sdk:billingclient:1.1.1")
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 // From node_modules
 }

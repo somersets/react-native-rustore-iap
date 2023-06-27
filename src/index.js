@@ -31,3 +31,6 @@ export async function getRuStoreProducts(productsIds) {
 export async function getRuStorePurchases() {
     return await RuStoreIap.getRuStorePurchases();
 }
+export async function getRuStorePurchase(purchaseId) {
+    return await RuStoreIap.getRuStorePurchase(purchaseId);
+}

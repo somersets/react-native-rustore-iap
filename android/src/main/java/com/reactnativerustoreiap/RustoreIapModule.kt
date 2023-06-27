@@ -1,9 +1,15 @@
 package com.reactnativerustoreiap
 
-import android.app.Application
 import android.net.Uri
 import com.facebook.react.bridge.*
+import com.reactnativerustoreiap.dto.OnSuccessInfo
+import com.reactnativerustoreiap.dto.payment.InvalidPurchase
+import com.reactnativerustoreiap.dto.payment.PurchaseResult
+import com.reactnativerustoreiap.dto.product.RuStoreProductInfo
+import com.reactnativerustoreiap.dto.purchase.RuStorePurchaseInfo
+import com.reactnativerustoreiap.dto.product.RuStoreProductSubscriptionInfo
 import ru.rustore.sdk.billingclient.RuStoreBillingClient
+import ru.rustore.sdk.billingclient.RuStoreBillingClientFactory
 import ru.rustore.sdk.billingclient.model.product.*
 import ru.rustore.sdk.billingclient.model.purchase.PaymentFinishCode
 import ru.rustore.sdk.billingclient.model.purchase.PaymentResult
@@ -13,6 +19,9 @@ import ru.rustore.sdk.core.tasks.OnCompleteListener
 
 class RustoreIapModule(reactContext: ReactApplicationContext) :
   ReactContextBaseJavaModule(reactContext) {
+  companion object {
+    lateinit var ruStoreBillingClient: RuStoreBillingClient
+  }
 
   override fun getName(): String {
     return "RustoreIap"
@@ -24,10 +33,10 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
     deeplinkScheme: String = "",
     externalPaymentLoggerFactory: Boolean?,
   ) {
-    if (RuStoreBillingClient.isInitialized) return;
+    if (RuStoreBillingClientFactory.isSingletonInitialized) return;
     if (externalPaymentLoggerFactory != null && externalPaymentLoggerFactory) {
       currentActivity?.let {
-        RuStoreBillingClient.init(
+        ruStoreBillingClient = RuStoreBillingClientFactory.create(
           it.application,
           consoleAppId,
           deeplinkScheme,
@@ -37,7 +46,7 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
       }
     } else {
       currentActivity?.let {
-        RuStoreBillingClient.init(
+        ruStoreBillingClient = RuStoreBillingClientFactory.create(
           it.application,
           consoleAppId,
           deeplinkScheme,
@@ -50,9 +59,7 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
 
   @ReactMethod
   fun checkRuStorePurchasesAvailability(promise: Promise) {
-    if (!RuStoreBillingClient.isInitialized) return;
-
-    RuStoreBillingClient.purchases.checkPurchasesAvailability()
+    ruStoreBillingClient.purchases.checkPurchasesAvailability()
       .addOnCompleteListener(object : OnCompleteListener<FeatureAvailabilityResult> {
         override fun onFailure(throwable: Throwable) {
           // Process error
@@ -74,8 +81,6 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
 
   @ReactMethod
   fun purchaseRuStoreProduct(product: ReadableMap, developerPayload: String?, promise: Promise) {
-    if (!RuStoreBillingClient.isInitialized) return;
-
     val subscription = product.getMap("subscription")
     val freeTrialPeriod = subscription?.getMap("freeTrialPeriod")
     val gracePeriod = subscription?.getMap("gracePeriod")
@@ -144,7 +149,7 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
 
 
 
-    RuStoreBillingClient.purchases.purchaseProduct(nativeProduct.productId)
+    ruStoreBillingClient.purchases.purchaseProduct(nativeProduct.productId)
       .addOnSuccessListener { paymentResult ->
         handlePaymentResult(
           paymentResult,
@@ -164,18 +169,10 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
     developerPayload: String?,
     promise: Promise
   ) {
-    if (!RuStoreBillingClient.isInitialized) return;
-
     when (paymentResult) {
       is PaymentResult.InvalidPurchase -> {
         paymentResult.purchaseId?.let { deleteRuStorePurchase(it, null) }
-        val payRes = Arguments.createMap()
-        payRes.putString("purchaseId", paymentResult.purchaseId)
-        paymentResult.errorCode?.let { payRes.putInt("errorCode", it) }
-        payRes.putString("productId", paymentResult.productId)
-        payRes.putString("orderId", paymentResult.orderId)
-        payRes.putString("invoiceId", paymentResult.invoiceId)
-        paymentResult.quantity?.let { payRes.putInt("quantity", it) }
+        val payRes = InvalidPurchase(paymentResult).toMap()
         promise.resolve(payRes)
       }
       is PaymentResult.PurchaseResult -> {
@@ -185,12 +182,7 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
               product.productType == ProductType.SUBSCRIPTION
             ) {
               confirmPurchase(paymentResult.purchaseId, developerPayload, promise)
-              val payRes = Arguments.createMap()
-              payRes.putString("purchaseId", paymentResult.purchaseId)
-              payRes.putString("productId", paymentResult.productId)
-              payRes.putString("orderId", paymentResult.orderId)
-              payRes.putString("subscriptionToken", paymentResult.subscriptionToken)
-              payRes.putString("finishCode", paymentResult.finishCode.toString())
+              val payRes = PurchaseResult(paymentResult).toMap()
               promise.resolve(payRes)
             }
           }
@@ -201,12 +193,7 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
           PaymentFinishCode.RESULT_UNKNOWN,
           -> {
             deleteRuStorePurchase(paymentResult.purchaseId, null)
-            val payRes = Arguments.createMap()
-            payRes.putString("purchaseId", paymentResult.purchaseId)
-            payRes.putString("productId", paymentResult.productId)
-            payRes.putString("orderId", paymentResult.orderId)
-            payRes.putString("subscriptionToken", paymentResult.subscriptionToken)
-            payRes.putString("finishCode", paymentResult.finishCode.toString())
+            val payRes = PurchaseResult(paymentResult).toMap()
             promise.resolve(payRes)
           }
         }
@@ -216,116 +203,30 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
-  fun getRuStoreProducts(productIds: ReadableArray, promise: Promise) {
-    if (!RuStoreBillingClient.isInitialized) return;
+  fun getRuStorePurchaseInfo(purchaseId: String, promise: Promise) {
+    try {
+      val purchaseInfo = ruStoreBillingClient.purchases.getPurchaseInfo(purchaseId).await()
+      val purchaseResponseMap = RuStorePurchaseInfo(purchaseInfo.purchase).toMap()
+      promise.resolve(purchaseResponseMap)
+    } catch (e: Throwable) {
+      promise.reject("Getting purchase info error!", e)
+    }
 
+  }
+
+  @ReactMethod
+  fun getRuStoreProducts(productIds: ReadableArray, promise: Promise) {
     try {
       val ids = productIds.toArrayList().toList() as List<String>
-      val productsResponse = RuStoreBillingClient.products.getProducts(ids).await()
+      val productsResponse = ruStoreBillingClient.products.getProducts(ids).await()
 
       val products = Arguments.createArray()
 
       productsResponse.products?.let { it ->
         for (nativeProduct in it) {
-          val product = Arguments.createMap()
-          val subscription = Arguments.createMap()
-          val freeTrialPeriod = Arguments.createMap()
-          val gracePeriod = Arguments.createMap()
-          val introductoryPricePeriod = Arguments.createMap()
-          val subscriptionPeriod = Arguments.createMap()
+          val product = RuStoreProductInfo(nativeProduct).toMap()
+          val subscription = RuStoreProductSubscriptionInfo(nativeProduct.subscription).toMap()
 
-          product.putString("productId", nativeProduct.productId)
-          product.putString("productType", nativeProduct.productType.toString())
-          product.putString("productStatus", nativeProduct.productStatus.toString())
-          product.putString("priceLabel", nativeProduct.priceLabel)
-          nativeProduct.price?.let { product.putInt("price", it) }
-          product.putString("currency", nativeProduct.currency)
-          product.putString("language", nativeProduct.language)
-          product.putString("title", nativeProduct.title)
-          product.putString("description", nativeProduct.description)
-          product.putString("imageUrl", nativeProduct.imageUrl.toString())
-          product.putString("promoImageUrl", nativeProduct.promoImageUrl.toString())
-          subscription.putString("introductoryPrice", nativeProduct.subscription?.introductoryPrice)
-          subscription.putString(
-            "introductoryPriceAmount",
-            nativeProduct.subscription?.introductoryPriceAmount
-          )
-
-          nativeProduct.subscription?.freeTrialPeriod.let {
-            freeTrialPeriod.putInt(
-              "days",
-              it?.days ?: 0
-            )
-          }
-          nativeProduct.subscription?.freeTrialPeriod.let {
-            freeTrialPeriod.putInt(
-              "months",
-              it?.months ?: 0
-            )
-          }
-          nativeProduct.subscription?.freeTrialPeriod.let {
-            freeTrialPeriod.putInt(
-              "years",
-              it?.years ?: 0
-            )
-          }
-
-          nativeProduct.subscription?.gracePeriod.let { gracePeriod.putInt("days", it?.days ?: 0) }
-          nativeProduct.subscription?.gracePeriod.let {
-            gracePeriod.putInt(
-              "months",
-              it?.months ?: 0
-            )
-          }
-          nativeProduct.subscription?.gracePeriod.let {
-            gracePeriod.putInt(
-              "years",
-              it?.years ?: 0
-            )
-          }
-
-          nativeProduct.subscription?.introductoryPricePeriod.let {
-            introductoryPricePeriod.putInt(
-              "days",
-              it?.days ?: 0
-            )
-          }
-          nativeProduct.subscription?.introductoryPricePeriod.let {
-            introductoryPricePeriod.putInt(
-              "months",
-              it?.months ?: 0
-            )
-          }
-          nativeProduct.subscription?.introductoryPricePeriod.let {
-            introductoryPricePeriod.putInt(
-              "years",
-              it?.years ?: 0
-            )
-          }
-
-          nativeProduct.subscription?.subscriptionPeriod.let {
-            subscriptionPeriod.putInt(
-              "days",
-              it?.days ?: 0
-            )
-          }
-          nativeProduct.subscription?.subscriptionPeriod.let {
-            subscriptionPeriod.putInt(
-              "months",
-              it?.months ?: 0
-            )
-          }
-          nativeProduct.subscription?.subscriptionPeriod.let {
-            subscriptionPeriod.putInt(
-              "years",
-              it?.years ?: 0
-            )
-          }
-
-          subscription.putMap("freeTrialPeriod", freeTrialPeriod)
-          subscription.putMap("gracePeriod", gracePeriod)
-          subscription.putMap("introductoryPricePeriod", introductoryPricePeriod)
-          subscription.putMap("subscriptionPeriod", subscriptionPeriod)
           product.putMap("subscription", subscription)
           products.pushMap(product)
         }
@@ -340,33 +241,13 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
 
   @ReactMethod
   fun getRuStorePurchases(promise: Promise) {
-    if (!RuStoreBillingClient.isInitialized) return;
-
     try {
-      val purchaseResponse = RuStoreBillingClient.purchases.getPurchases().await()
+      val purchaseResponse = ruStoreBillingClient.purchases.getPurchases().await()
       val purchases = Arguments.createArray()
 
       purchaseResponse.purchases?.let { it ->
         for (nativeProduct in it) {
-          val purchase = Arguments.createMap()
-
-          purchase.putString("purchaseId", nativeProduct.purchaseId)
-          purchase.putString("productId", nativeProduct.productId)
-          purchase.putString("description", nativeProduct.description)
-          purchase.putString("language", nativeProduct.language)
-          purchase.putString("purchaseTime", nativeProduct.purchaseTime.toString())
-          purchase.putString("orderId", nativeProduct.orderId)
-          purchase.putString("amountLabel", nativeProduct.amountLabel)
-          nativeProduct.amount?.let { purchase.putInt("amount", it) }
-          purchase.putString("currency", nativeProduct.currency)
-          nativeProduct.quantity?.let { purchase.putInt("quantity", it) }
-          purchase.putString("purchaseState", nativeProduct.purchaseState.toString())
-          purchase.putString("subscriptionToken", nativeProduct.subscriptionToken)
-          purchase.putString(
-            "developerPayload",
-            nativeProduct.developerPayload
-          )
-
+          val purchase = RuStorePurchaseInfo(nativeProduct).toMap()
           purchases.pushMap(purchase)
         }
       }
@@ -379,26 +260,13 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
 
   @ReactMethod
   fun deleteRuStorePurchase(purchaseId: String, promise: Promise?) {
-    if (!RuStoreBillingClient.isInitialized) return;
-
     try {
-      RuStoreBillingClient.purchases.deletePurchase(purchaseId)
+      ruStoreBillingClient.purchases.deletePurchase(purchaseId)
         .addOnSuccessListener { response ->
-          val deletePurchaseResponse = Arguments.createMap()
-          val responseMeta = Arguments.createMap()
-
-          responseMeta.putString("traceId", response.meta?.traceId)
-
-          deletePurchaseResponse.putInt("code", response.code)
-          deletePurchaseResponse.putString("errorDescription", response.errorDescription)
-          deletePurchaseResponse.putString("errorMessage", response.errorMessage)
-
-          deletePurchaseResponse.putMap("meta", responseMeta)
-
+          val deletePurchaseResponse = OnSuccessInfo(response).toMap()
           promise?.resolve(deletePurchaseResponse)
         }
-        .addOnFailureListener {
-        }
+        .addOnFailureListener {}
     } catch (e: Throwable) {
       promise?.reject("On delete purchase error!", e)
     }
@@ -410,22 +278,9 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
     developerPayload: String?,
     promise: Promise
   ) {
-    if (!RuStoreBillingClient.isInitialized) return;
-
-    RuStoreBillingClient.purchases.confirmPurchase(purchaseId, developerPayload)
+    ruStoreBillingClient.purchases.confirmPurchase(purchaseId, developerPayload)
       .addOnSuccessListener { response ->
-        val confirmPurchaseResponse = Arguments.createMap()
-
-        val responseMeta = Arguments.createMap()
-
-        responseMeta.putString("traceId", response.meta?.traceId)
-
-        confirmPurchaseResponse.putInt("code", response.code)
-        confirmPurchaseResponse.putString("errorDescription", response.errorDescription)
-        confirmPurchaseResponse.putString("errorMessage", response.errorMessage)
-
-        confirmPurchaseResponse.putMap("meta", responseMeta)
-
+        val confirmPurchaseResponse = OnSuccessInfo(response).toMap()
         promise.resolve(confirmPurchaseResponse)
       }
       .addOnFailureListener {
