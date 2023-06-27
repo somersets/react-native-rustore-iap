@@ -59,7 +59,10 @@ class RustoreIapModule(reactContext: ReactApplicationContext) :
 
   @ReactMethod
   fun checkRuStorePurchasesAvailability(promise: Promise) {
-    if (!RuStoreBillingClientFactory.isSingletonInitialized) return;
+    if (!RuStoreBillingClientFactory.isSingletonInitialized) {
+      promise.resolve(false)
+      return;
+    }
 
     ruStoreBillingClient.purchases.checkPurchasesAvailability()
       .addOnCompleteListener(object : OnCompleteListener<FeatureAvailabilityResult> {
