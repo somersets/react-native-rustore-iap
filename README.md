@@ -1,8 +1,8 @@
 # React Native RuStore IAP
 Данная библиотека является оберткой над RuStore SDK
-### Если версия 0.9.6 не работает, используйте 0.9.5
-## Установка
 
+## Установка
+#### При проблемах с последней версией попробуйте 0.9.5
 ```sh
 npm install @devsomersets/react-native-rustore-iap
 ```
@@ -37,7 +37,9 @@ pod 'react-native-rustore-iap', :podspec => '../node_modules/react-native-rustor
 
 ## Expo plugin
 Поддержка Managed проектов Expo c expo-config-plugin
-
+В корне проекта нужно создать app.json
+Используя этот способ вам не нужно создавать папку android и вручную вносить правки в gradle
+https://docs.expo.dev/config-plugins/introduction/
 ```
 app.json
 ...
@@ -130,6 +132,13 @@ const products: RuStoreProduct[] = await getRuStoreProducts(productsIds: String[
 import { getRuStorePurchases } from '@devsomersets/react-native-rustore-iap';
 
 const products: RuStorePurchase[] = await getRuStorePurchases();
+```
+
+## Получение покупки пользователя
+```ts
+import { getRuStorePurchase } from '@devsomersets/react-native-rustore-iap';
+
+const product: RuStorePurchase = await getRuStorePurchase(purchaseId: string);
 ```
 
 ## Покупка продукта
