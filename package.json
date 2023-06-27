@@ -129,7 +129,10 @@
   },
   "eslintIgnore": [
     "node_modules/",
-    "lib/"
+    "lib/",
+    "src/index.js",
+    "src/enums.js",
+    "plugin/src/index.js"
   ],
   "prettier": {
     "quoteProps": "consistent",
