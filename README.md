@@ -25,7 +25,7 @@ android/app/build.gradle
 
 dependencies {
     ...
-    implementation("ru.rustore.sdk:billingclient:0.1.7")
+    implementation("ru.rustore.sdk:billingclient:1.1.1")
 }
 ```
 При разработке локально дебаг билд нужно подписывать тем кейстором, который использовался при загрузке приложения в RuStore Console.
