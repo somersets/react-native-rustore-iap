@@ -8,6 +8,6 @@ class RustoreIntent : ReactActivity() {
   override fun onNewIntent(intent: Intent?) {
     super.onNewIntent(intent)
 
-    RuStoreBillingClient.onNewIntent(intent)
+    RustoreIapModule.ruStoreBillingClient.onNewIntent(intent)
   }
 }

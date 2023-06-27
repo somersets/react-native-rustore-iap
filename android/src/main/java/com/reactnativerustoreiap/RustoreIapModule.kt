@@ -19,8 +19,9 @@ import ru.rustore.sdk.core.tasks.OnCompleteListener
 
 class RustoreIapModule(reactContext: ReactApplicationContext) :
   ReactContextBaseJavaModule(reactContext) {
-
-  lateinit var ruStoreBillingClient: RuStoreBillingClient
+  companion object {
+    lateinit var ruStoreBillingClient: RuStoreBillingClient
+  }
 
   override fun getName(): String {
     return "RustoreIap"
