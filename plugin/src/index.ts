@@ -14,7 +14,7 @@ const gradleMaven = [
 ].join('\n');
 
 const implementationDeps = [
-  `dependencies { implementation("ru.rustore.sdk:billingclient:0.1.7") }`,
+  `dependencies { implementation("ru.rustore.sdk:billingclient:1.1.1") }`,
 ].join('\n');
 
 function addRuStoreBillingClientImportProjectGradle(src: string): MergeResults {
