@@ -5,7 +5,7 @@
 ### https://www.tinkoff.ru/cf/1to7PiSSNzj
 
 ## Установка
-#### При проблемах с последней версией попробуйте 0.9.5
+#### При проблемах с последней версией попробуйте 0.9.5 - @devsomersets/react-native-rustore-iap
 ```sh
 npm install @somersets/react-native-rustore-iap
 ```
