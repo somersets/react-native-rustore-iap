@@ -1,7 +1,7 @@
 {
   "name": "@somersets/react-native-rustore-iap",
   "version": "1.3.4",
-  "description": "test",
+  "description": "ReactNative RuStore IAP SDK",
   "main": "./lib/module/index.js",
   "module": "./lib/module/index.js",
   "types": "./lib/typescript/index.d.ts",
