@@ -105,6 +105,7 @@ export interface RuStorePurchase {
   language: string;
   purchaseTime: string;
   orderId: string;
+  productType: string;
   amountLabel: string;
   amount: number;
   currency: string;
