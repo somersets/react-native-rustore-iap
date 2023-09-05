@@ -1,9 +1,6 @@
 # React Native RuStore IAP
 Данная библиотека является оберткой над RuStore SDK
 
-### Для поддержки проекта
-### https://www.tinkoff.ru/cf/1to7PiSSNzj
-
 ## Установка
 #### При проблемах с последней версией попробуйте 0.9.5 - @devsomersets/react-native-rustore-iap
 ```sh
